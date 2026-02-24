@@ -24,6 +24,16 @@ function buildReportPrompt(
     ? Math.round(metrics.reduce((sum, m) => sum + m.words_per_minute, 0) / metrics.length)
     : 0;
 
+  const validTalkRatios = metrics.filter(m => m.talk_ratio !== undefined);
+  const avgTalkRatio = validTalkRatios.length > 0
+    ? Math.round(validTalkRatios.reduce((sum, m) => sum + m.talk_ratio, 0) / validTalkRatios.length)
+    : 0;
+
+  const validClarityScores = metrics.filter(m => m.clarity_score !== undefined);
+  const avgClarityScore = validClarityScores.length > 0
+    ? Math.round(validClarityScores.reduce((sum, m) => sum + m.clarity_score, 0) / validClarityScores.length)
+    : 0;
+
   const tones = metrics.map(m => m.tone);
   const dominantTone = tones.length > 0
     ? tones.sort((a, b) =>
@@ -64,6 +74,8 @@ ${dialogueScript}
 USER'S AGGREGATED METRICS:
 - Total filler words used by user: ${totalFillers}
 - Average words per minute: ${avgWpm}
+- Average talk ratio: ${avgTalkRatio}%
+- Average clarity score (unique words / total words): ${avgClarityScore}/100
 - Dominant tone: ${dominantTone}
 - Total times user spoke: ${userEntriesCount}
 
@@ -81,7 +93,9 @@ as a JSON object with this exact structure:
     "total_filler_words": ${totalFillers},
     "avg_words_per_minute": ${avgWpm},
     "dominant_tone": "${dominantTone}",
-    "interruption_recovery_avg_ms": <estimated number>
+    "interruption_recovery_avg_ms": <estimated number>,
+    "avg_talk_ratio": ${avgTalkRatio},
+    "avg_clarity_score": ${avgClarityScore}
   },
   "key_moments": [
     {"timestamp": "<mm:ss>", "type": "strength"|"weakness", "note": "<description of USER's moment, referencing the dialogue>"}
@@ -130,18 +144,20 @@ export async function generateReport(
       session_id: sessionId,
       mode,
       duration_seconds: durationSeconds,
-      overall_score: 0,
+      overall_score: 5,
       categories: {
-        clarity: { score: 0, feedback: 'Report generation failed.' },
-        confidence: { score: 0, feedback: 'Report generation failed.' },
-        persuasiveness: { score: 0, feedback: 'Report generation failed.' },
-        composure: { score: 0, feedback: 'Report generation failed.' },
+        clarity: { score: 5, feedback: 'Report generation failed. Please try again later.' },
+        confidence: { score: 5, feedback: 'Report generation failed. Please try again later.' },
+        persuasiveness: { score: 5, feedback: 'Report generation failed.' },
+        composure: { score: 5, feedback: 'Report generation failed.' },
       },
       metrics: {
         total_filler_words: 0,
         avg_words_per_minute: 0,
         dominant_tone: 'unknown',
         interruption_recovery_avg_ms: 0,
+        avg_talk_ratio: 0,
+        avg_clarity_score: 0,
       },
       key_moments: [],
       improvement_tips: ['Unable to generate report. Please try again.'],

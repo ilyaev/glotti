@@ -28,8 +28,15 @@ const store = createStore();
 // Simple filler word detection for real-time metrics
 const FILLER_WORDS = ['um', 'uh', 'like', 'you know', 'basically', 'actually', 'so', 'right', 'well', 'i mean'];
 
-function extractMetrics(text: string, elapsedSeconds: number): MetricSnapshot {
-  const lower = text.toLowerCase();
+function extractMetrics(
+  userText: string,
+  aiText: string,
+  elapsedSeconds: number,
+  mode: Mode,
+  tone: string,
+  llmHint: string = ''
+): MetricSnapshot {
+  const lower = userText.toLowerCase();
   const fillerCounts: Record<string, number> = {};
   for (const filler of FILLER_WORDS) {
     const regex = new RegExp(`\\b${filler}\\b`, 'gi');
@@ -39,25 +46,40 @@ function extractMetrics(text: string, elapsedSeconds: number): MetricSnapshot {
     }
   }
 
-  const wordCount = text.split(/\s+/).filter(w => w.length > 0).length;
-  const minutes = Math.max(elapsedSeconds / 60, 0.1);
-  const wpm = Math.round(wordCount / minutes);
+  const userWords = userText.split(/\s+/).filter(w => w.length > 0).length;
+  const aiWords = aiText.split(/\s+/).filter(w => w.length > 0).length;
+  const totalWords = Math.max(userWords + aiWords, 1);
+  const talk_ratio = Math.round((userWords / totalWords) * 100);
 
-  // Simple tone heuristic
-  let tone = 'neutral';
-  if (lower.includes('!') || lower.includes('confident') || lower.includes('sure')) tone = 'confident';
-  else if (lower.includes('?') && wordCount < 10) tone = 'uncertain';
-  else if (lower.includes('sorry') || lower.includes('maybe')) tone = 'nervous';
+  const uniqueWords = new Set(lower.replace(/[^\\w\\s]/g, '').split(/\\s+/).filter(w => w.length > 0));
+  const clarity_score = userWords > 0 ? Math.min(Math.round((uniqueWords.size / userWords) * 100), 100) : 100;
+
+  const minutes = Math.max(elapsedSeconds / 60, 0.1);
+  const wpm = Math.round(userWords / minutes);
+
+  // Dynamic hints: prefer LLM hint, fallback to heuristics
+  let hint = llmHint;
+  if (!hint) {
+    if (mode === 'pitch_perfect' && wpm > 180) {
+      hint = '💡 You are speaking very fast. Take a breath and slow down.';
+    } else if (mode === 'empathy_trainer' && talk_ratio > 65) {
+      hint = '💡 Try to listen more. Let the other person speak.';
+    } else if (Object.keys(fillerCounts).length > 0) {
+      hint = `💡 Try reducing filler words like "${Object.keys(fillerCounts)[0]}"`;
+    } else if (mode === 'veritalk' && !userText.includes('?')) {
+      hint = '💡 Try flipping the defense: ask them a clarifying question.';
+    }
+  }
 
   return {
     filler_words: fillerCounts,
     words_per_minute: wpm,
     tone,
     key_phrases: [],
-    improvement_hint: Object.keys(fillerCounts).length > 0
-      ? `Try reducing filler words like "${Object.keys(fillerCounts)[0]}"`
-      : '',
+    improvement_hint: hint,
     timestamp: Date.now(),
+    talk_ratio,
+    clarity_score
   };
 }
 
@@ -80,6 +102,9 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
   let userTranscriptBuffer = '';
   let aiTranscriptBuffer = '';
   let audioChunkCount = 0;
+  let currentTone = 'Neutral';
+  let currentHint = '';
+  let lastToneCheck = Date.now();
 
   console.log(`🎙️  New session: ${sessionId} [${mode}]`);
   console.log(`   System prompt loaded: ${MODES[mode]}`);
@@ -158,7 +183,41 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
 
                 // We still need all user text concatenated for metrics extraction
                 const allUserText = transcript.filter(t => t.role === 'user').map(t => t.text).join(' ');
-                const metric = extractMetrics(allUserText, elapsed);
+                const allAiText = transcript.filter(t => t.role === 'ai').map(t => t.text).join(' ');
+
+                // Trigger LLM Tone Analysis periodically
+                const now = Date.now();
+                if (now - lastToneCheck > 15000 && allUserText.split(' ').length > 10) {
+                   lastToneCheck = now;
+                   genai.models.generateContent({
+                      model: 'gemini-2.5-flash',
+                      contents: `Analyze the following text from a user in a speech coaching session. Return a JSON object with two fields: "tone" (exactly one word describing the emotional tone of the speaker, e.g., Confident, Nervous, Defensive, Excited, Thoughtful, Frustrated) and "hint" (a very short, one-sentence actionable coaching hint for the user based on the current context). If no specific hint is needed, "hint" can be empty.\n\nText: "${allUserText.slice(-800)}"`,
+                      config: {
+                         responseMimeType: "application/json"
+                      }
+                   }).then(res => {
+                      try {
+                         const json = JSON.parse(res.text || '{}');
+                         const newTone = json.tone ? json.tone.trim().replace(/[^a-zA-Z]/g, '') : null;
+                         const newHint = json.hint ? `💡 ${json.hint}` : '';
+
+                         if (newTone && ws.readyState === ws.OPEN) {
+                            currentTone = newTone;
+                            currentHint = newHint;
+                            // Broadcast the updated tone immediately
+                            const latestElapsed = Math.round((Date.now() - startedAt.getTime()) / 1000);
+                            const toneMetric = extractMetrics(allUserText, allAiText, latestElapsed, mode, currentTone, currentHint);
+                            ws.send(JSON.stringify({ type: 'metrics', data: toneMetric }));
+                         }
+                      } catch (e) {
+                         console.error(`   [${sessionId}] Failed to parse LLM JSON response:`, e);
+                      }
+                   }).catch(err => {
+                      console.error(`   [${sessionId}] Background tone/hint analysis failed:`, err);
+                   });
+                }
+
+                const metric = extractMetrics(allUserText, allAiText, elapsed, mode, currentTone, currentHint);
                 metrics.push(metric);
                 ws.send(JSON.stringify({ type: 'metrics', data: metric }));
                 userTranscriptBuffer = '';

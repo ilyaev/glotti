@@ -4,6 +4,8 @@ export interface MetricSnapshot {
   tone: string;
   key_phrases: string[];
   improvement_hint: string;
+  talk_ratio: number;
+  clarity_score: number;
 }
 
 export interface SessionReport {
@@ -17,6 +19,8 @@ export interface SessionReport {
     avg_words_per_minute: number;
     dominant_tone: string;
     interruption_recovery_avg_ms: number;
+    avg_talk_ratio: number;
+    avg_clarity_score: number;
   };
   key_moments: Array<{ timestamp: string; type: 'strength' | 'weakness'; note: string }>;
   improvement_tips: string[];

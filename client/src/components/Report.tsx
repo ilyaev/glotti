@@ -75,6 +75,14 @@ export function Report({ data, onRestart }: Props) {
                     <span className="report__metric-value">{(data.metrics.interruption_recovery_avg_ms / 1000).toFixed(1)}s</span>
                     <span className="report__metric-label">Recovery Time</span>
                 </div>
+                <div className="report__metric-col">
+                    <span className="report__metric-value">{data.metrics.avg_talk_ratio}%</span>
+                    <span className="report__metric-label">Talk Ratio</span>
+                </div>
+                <div className="report__metric-col">
+                    <span className="report__metric-value">{data.metrics.avg_clarity_score}</span>
+                    <span className="report__metric-label">Clarity</span>
+                </div>
             </div>
 
             {/* Key moments */}

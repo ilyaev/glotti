@@ -32,7 +32,7 @@ export function Waveform({ analyserRef }: Props) {
             if (!analyser || !ctx) {
                 // Draw idle waveform
                 ctx!.clearRect(0, 0, width, height);
-                ctx!.strokeStyle = 'rgba(79, 140, 255, 0.3)';
+                ctx!.strokeStyle = 'rgba(91, 135, 130, 0.4)'; /* Sage green, semitransparent */
                 ctx!.lineWidth = 2;
                 ctx!.beginPath();
                 ctx!.moveTo(0, height / 2);
@@ -48,12 +48,12 @@ export function Waveform({ analyserRef }: Props) {
             ctx.clearRect(0, 0, width, height);
 
             // Glow effect
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = '#4f8cff';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(91, 135, 130, 0.5)';
 
             // Draw waveform
             ctx.lineWidth = 2;
-            ctx.strokeStyle = '#4f8cff';
+            ctx.strokeStyle = '#5b8782';
             ctx.beginPath();
 
             const sliceWidth = width / bufferLength;

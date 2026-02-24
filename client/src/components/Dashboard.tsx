@@ -11,8 +11,8 @@ export function Dashboard({ metrics }: Props) {
         ? Object.values(metrics.filler_words).reduce((a, b) => a + b, 0)
         : 0;
 
-    const toneClass = metrics?.tone
-        ? `tone-badge--${metrics.tone}`
+    const toneClass = metrics?.tone && metrics.tone !== 'Neutral'
+        ? `tone-badge--active`
         : 'tone-badge--neutral';
 
     return (
@@ -32,6 +32,18 @@ export function Dashboard({ metrics }: Props) {
                     {metrics?.tone || 'Listening...'}
                 </span>
                 <span className="dashboard__label">Tone</span>
+            </div>
+            <div className="dashboard__metric">
+                <span className="dashboard__value">
+                    {metrics?.talk_ratio !== undefined ? `${metrics.talk_ratio}%` : '—'}
+                </span>
+                <span className="dashboard__label">Talk Ratio</span>
+            </div>
+            <div className="dashboard__metric">
+                <span className="dashboard__value">
+                    {metrics?.clarity_score || '—'}
+                </span>
+                <span className="dashboard__label">Clarity</span>
             </div>
             {metrics?.improvement_hint && (
                 <div className="dashboard__hint">
