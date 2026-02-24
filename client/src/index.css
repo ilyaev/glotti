@@ -89,7 +89,9 @@ body {
 
 body {
   font-family: var(--font-body);
-  background: var(--bg-primary);
+  /* More pronounced gradient: Pure white center to deeper beige edges */
+  background: radial-gradient(circle at center, #ffffff 0%, var(--bg-primary) 40%, #e9e4d9 100%);
+  background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -111,9 +113,14 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  /* Shifted from center to top */
+  padding-top: 12vh;
+  /* Precise control for 'higher up' */
   height: 100%;
-  padding: var(--space-xl);
+  padding-left: var(--space-xl);
+  padding-right: var(--space-xl);
+  padding-bottom: var(--space-xl);
   animation: fadeUp 0.5s ease-out;
 }
 
@@ -129,7 +136,8 @@ body {
 
 .mode-select__header {
   text-align: center;
-  margin-bottom: var(--space-2xl);
+  margin-bottom: var(--space-lg);
+  /* Even tighter gap */
 }
 
 .logo-text {
@@ -203,6 +211,12 @@ body {
   /* Icons use the card accent color */
 }
 
+.mode-card__image-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
 @media (max-width: 768px) {
   .mode-card__icon {
     font-size: 36px;
@@ -228,6 +242,34 @@ body {
   font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.5;
+  margin-bottom: var(--space-xl);
+  /* Add space for the footer */
+}
+
+.mode-card__footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  color: var(--card-accent, var(--accent-blue));
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  opacity: 0.8;
+}
+
+.mode-card:hover .mode-card__footer {
+  opacity: 1;
+  transform: translateX(4px);
+}
+
+.mode-card__arrow {
+  transition: transform 0.25s ease;
+}
+
+.mode-card:hover .mode-card__arrow {
+  transform: translateX(2px);
 }
 
 /* ===== Session Screen ===== */
@@ -275,6 +317,12 @@ body {
   display: flex;
   align-items: center;
   color: var(--text-secondary);
+}
+
+.session__mode-image-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
 /* ===== Session Hint ===== */

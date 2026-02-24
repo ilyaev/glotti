@@ -115,13 +115,47 @@ export function Session({ mode, userId, onEnd }: Props) {
         setStatus('ending');
     };
 
-    const modeLabels: Record<string, { label: string; icon: React.ReactNode }> = {
-        pitch_perfect: { label: 'PitchPerfect', icon: <Target size={18} strokeWidth={2} /> },
-        empathy_trainer: { label: 'EmpathyTrainer', icon: <Handshake size={18} strokeWidth={2} /> },
-        veritalk: { label: 'Veritalk', icon: <Swords size={18} strokeWidth={2} /> },
+    const modeLabels: Record<string, { label: string; icon: React.ReactNode; iconUrl?: string }> = {
+        pitch_perfect: {
+            label: 'PitchPerfect',
+            icon: <Target size={18} strokeWidth={2} />,
+            iconUrl: '/icons/pitch_perfect.png'
+        },
+        empathy_trainer: {
+            label: 'EmpathyTrainer',
+            icon: <Handshake size={18} strokeWidth={2} />,
+            iconUrl: '/icons/empathy_trainer.png'
+        },
+        veritalk: {
+            label: 'Veritalk',
+            icon: <Swords size={18} strokeWidth={2} />,
+            iconUrl: '/icons/veritalk.png'
+        },
     };
 
     const modeInfo = modeLabels[mode] || { label: mode, icon: <Mic size={18} strokeWidth={2} /> };
+
+    const renderBadgeIcon = () => (
+        <span className="session__mode-icon">
+            {modeInfo.iconUrl ? (
+                <img
+                    src={modeInfo.iconUrl}
+                    alt={modeInfo.label}
+                    className="session__mode-image-icon"
+                    onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).parentElement!.querySelector('.lucide-icon-fallback')!.removeAttribute('style');
+                    }}
+                />
+            ) : null}
+            <span
+                className="lucide-icon-fallback"
+                style={modeInfo.iconUrl ? { display: 'none' } : {}}
+            >
+                {modeInfo.icon}
+            </span>
+        </span>
+    );
 
     // Show loading overlay when generating report
     if (status === 'ending') {
@@ -129,7 +163,7 @@ export function Session({ mode, userId, onEnd }: Props) {
             <div className="session session--ending">
                 <div className="session__topbar">
                     <span className="session__mode-badge">
-                        <span className="session__mode-icon">{modeInfo.icon}</span>
+                        {renderBadgeIcon()}
                         {modeInfo.label}
                     </span>
                     <span className={`session__timer ${elapsed >= 150 ? 'session__timer--warning' : ''}`}>{formatTime(elapsed)}</span>
@@ -162,7 +196,7 @@ export function Session({ mode, userId, onEnd }: Props) {
             {/* Top bar */}
             <div className="session__topbar">
                 <span className="session__mode-badge">
-                    <span className="session__mode-icon">{modeInfo.icon}</span>
+                    {renderBadgeIcon()}
                     {modeInfo.label}
                 </span>
                 <span className={`session__timer ${elapsed >= 150 ? 'session__timer--warning' : ''}`}>{formatTime(elapsed)}</span>

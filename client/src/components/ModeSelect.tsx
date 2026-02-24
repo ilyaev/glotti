@@ -1,5 +1,5 @@
 import type { Mode } from '../App';
-import { Target, Handshake, Swords } from 'lucide-react';
+import { Target, Handshake, Swords, ArrowRight } from 'lucide-react';
 
 interface Props {
     onStart: (mode: Mode) => void;
@@ -12,6 +12,7 @@ const modes = [
         subtitle: 'Startup Pitch Coach',
         description: 'Face a skeptical VC who will challenge every claim you make.',
         icon: <Target size={48} strokeWidth={1.5} />,
+        iconUrl: '/icons/pitch_perfect.png',
         color: '#4f8cff',
     },
     {
@@ -20,6 +21,7 @@ const modes = [
         subtitle: 'Difficult Conversations',
         description: 'Practice handling upset customers, struggling employees, and tense situations.',
         icon: <Handshake size={48} strokeWidth={1.5} />,
+        iconUrl: '/icons/empathy_trainer.png',
         color: '#22c55e',
     },
     {
@@ -28,6 +30,7 @@ const modes = [
         subtitle: 'Debate Sparring',
         description: 'Defend your thesis against real-time fact-checks and logical traps.',
         icon: <Swords size={48} strokeWidth={1.5} />,
+        iconUrl: '/icons/veritalk.png',
         color: '#8b5cf6',
     },
 ];
@@ -47,10 +50,33 @@ export function ModeSelect({ onStart }: Props) {
                         onClick={() => onStart(m.id)}
                         style={{ '--card-accent': m.color } as React.CSSProperties}
                     >
-                        <span className="mode-card__icon">{m.icon}</span>
+                        <span className="mode-card__icon">
+                            {m.iconUrl ? (
+                                <img
+                                    src={m.iconUrl}
+                                    alt={m.title}
+                                    className="mode-card__image-icon"
+                                    onError={(e) => {
+                                        // Fallback to Lucide icon if image fails to load
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                        (e.target as HTMLImageElement).parentElement!.querySelector('.lucide-icon-fallback')!.removeAttribute('style');
+                                    }}
+                                />
+                            ) : null}
+                            <span
+                                className="lucide-icon-fallback"
+                                style={m.iconUrl ? { display: 'none' } : {}}
+                            >
+                                {m.icon}
+                            </span>
+                        </span>
                         <h2 className="mode-card__title">{m.title}</h2>
                         <h3 className="mode-card__subtitle">{m.subtitle}</h3>
                         <p className="mode-card__desc">{m.description}</p>
+                        <div className="mode-card__footer">
+                            <span className="mode-card__start-text">Start Session</span>
+                            <ArrowRight size={18} className="mode-card__arrow" />
+                        </div>
                     </button>
                 ))}
             </div>
