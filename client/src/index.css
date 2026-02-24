@@ -264,7 +264,7 @@ body {
   justify-content: center;
   gap: 0.45rem;
   margin-top: 0.2rem;
-  margin-bottom: 0.4rem;
+  margin-bottom: 2rem;
   font-size: 0.85rem;
 }
 
@@ -1017,7 +1017,7 @@ body {
   font-family: var(--font-display);
   font-size: 36px;
   text-align: center;
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-xs);
 }
 
 @media (max-width: 768px) {
@@ -1027,7 +1027,7 @@ body {
 
   .report__title {
     font-size: 28px;
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-xs);
   }
 }
 

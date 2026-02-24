@@ -20,7 +20,7 @@ export function VeritalkReport({ data, onRestart, transcript, sessionId, userId,
         <div className="report">
             <h1 className="report__title">Debate Evaluation</h1>
             <PartnerInfo voiceName={data.voiceName} roleHint="Rhetorical Opponent" />
-            <p className="report__subtitle">Rhetorical Response Analysis</p>
+            {/* <p className="report__subtitle">Rhetorical Response Analysis</p> */}
             <ScoreGauge score={data.overall_score} />
             {(extra?.strongest_moment || extra?.weakest_moment) && (
                 <div className="report__highlight-row">

@@ -20,7 +20,7 @@ export function EmpathyTrainerReport({ data, onRestart, transcript, sessionId, u
         <div className="report">
             <h1 className="report__title">Empathy Evaluation</h1>
             <PartnerInfo voiceName={data.voiceName} roleHint="Emotional Sparring Partner" />
-            <p className="report__subtitle">Emotional Intelligence Review</p>
+            {/* <p className="report__subtitle">Emotional Intelligence Review</p> */}
             <ScoreGauge score={data.overall_score} />
 
             <CategoryCards categories={data.categories} />

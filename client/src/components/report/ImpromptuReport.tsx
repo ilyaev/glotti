@@ -20,7 +20,7 @@ export function ImpromptuReport({ data, onRestart, transcript, sessionId, userId
         <div className="report">
             <h1 className="report__title">Impromptu Evaluation</h1>
             <PartnerInfo voiceName={data.voiceName} roleHint="Improv Coach" />
-            <p className="report__subtitle">Spontaneous Speaking Debrief</p>
+            {/* <p className="report__subtitle">Spontaneous Speaking Debrief</p> */}
             {extra?.assigned_topic && (
                 <div className="report__topic-banner">
                     <span className="report__topic-label">Your Topic Was</span>

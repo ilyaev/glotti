@@ -20,7 +20,7 @@ export function PitchPerfectReport({ data, onRestart, transcript, sessionId, use
         <div className="report">
             <h1 className="report__title">Pitch Evaluation</h1>
             <PartnerInfo voiceName={data.voiceName} roleHint="Skeptical VC" />
-            <p className="report__subtitle">Post-Session Evaluation</p>
+            {/* <p className="report__subtitle">Post-Session Evaluation</p> */}
             <ScoreGauge score={data.overall_score} />
             {extra?.pitch_structure_score !== undefined && (
                 <div className="report__extra-card report__extra-card--pitch">
