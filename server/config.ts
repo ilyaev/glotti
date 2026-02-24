@@ -19,6 +19,7 @@ export const MODES = {
   pitch_perfect: 'server/agents/prompts/pitch-perfect.md',
   empathy_trainer: 'server/agents/prompts/empathy-trainer.md',
   veritalk: 'server/agents/prompts/veritalk.md',
+  impromptu: 'server/agents/prompts/impromptu.md',
 } as const;
 
 export type Mode = keyof typeof MODES;

@@ -4,7 +4,7 @@ import { useAudio } from '../hooks/useAudio';
 import { Dashboard } from './Dashboard';
 import { Waveform } from './Waveform';
 import type { SessionReport, MetricSnapshot, TranscriptCue } from '../types';
-import { Target, Handshake, Swords, Mic } from 'lucide-react';
+import { Target, Handshake, Swords, Mic, Zap } from 'lucide-react';
 
 interface Props {
     mode: string;
@@ -131,6 +131,11 @@ export function Session({ mode, userId, onEnd }: Props) {
             icon: <Swords size={18} strokeWidth={2} />,
             iconUrl: '/icons/veritalk.png'
         },
+        impromptu: {
+            label: 'Impromptu',
+            icon: <Zap size={18} strokeWidth={2} />,
+            iconUrl: '/icons/impromptu.png'
+        }
     };
 
     const modeInfo = modeLabels[mode] || { label: mode, icon: <Mic size={18} strokeWidth={2} /> };

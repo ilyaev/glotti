@@ -1,5 +1,5 @@
 import type { Mode } from '../App';
-import { Target, Handshake, Swords, ArrowRight } from 'lucide-react';
+import { Target, Handshake, Swords, Zap, ArrowRight } from 'lucide-react';
 
 interface Props {
     onStart: (mode: Mode) => void;
@@ -32,6 +32,15 @@ const modes = [
         icon: <Swords size={48} strokeWidth={1.5} />,
         iconUrl: '/icons/veritalk.png',
         color: '#8b5cf6',
+    },
+    {
+        id: 'impromptu' as Mode,
+        title: 'Impromptu',
+        subtitle: 'Think on Your Feet',
+        description: 'Get a random topic and speak for 2 minutes — no prep, no safety net.',
+        icon: <Zap size={48} strokeWidth={1.5} />,
+        iconUrl: '/icons/impromptu.png',
+        color: '#f59e0b',
     },
 ];
 

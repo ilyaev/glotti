@@ -5,7 +5,7 @@ import { Report } from './components/Report';
 import type { SessionReport } from './types';
 
 export type Screen = 'select' | 'session' | 'report';
-export type Mode = 'pitch_perfect' | 'empathy_trainer' | 'veritalk';
+export type Mode = 'pitch_perfect' | 'empathy_trainer' | 'veritalk' | 'impromptu';
 
 export default function App() {
     const [screen, setScreen] = useState<Screen>('select');

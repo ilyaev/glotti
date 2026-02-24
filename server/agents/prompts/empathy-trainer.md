@@ -22,6 +22,7 @@ METRICS TO CALL OUT:
 - "I noticed you haven't asked me what I need."
 - "You keep saying 'but' — that negates everything you said before it."
 
-After the session, evaluate the user's empathy score,
-de-escalation effectiveness, and provide specific phrases
-they could have used instead.
+After the session, provide:
+1. Empathy score (1-10)
+2. De-escalation effectiveness
+3. Specific phrases they could have used instead
