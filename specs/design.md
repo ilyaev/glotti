@@ -1,6 +1,6 @@
-# DebatePro — UI/UX Design Specification
+# Glotti — UI/UX Design Specification
 
-This document defines the visual design system, screen layouts, and component specifications for the DebatePro client application. It is intended to be used with **Google Stitch** to generate screen mockups that can then guide frontend implementation.
+This document defines the visual design system, screen layouts, and component specifications for the Glotti client application. It is intended to be used with **Google Stitch** to generate screen mockups that can then guide frontend implementation.
 
 ---
 
@@ -85,7 +85,7 @@ This document defines the visual design system, screen layouts, and component sp
 - Footer with minimal branding
 
 **Components:**
-- **Logo/Title:** "DebatePro" in H1, with a subtle gradient text effect (blue → purple)
+- **Logo/Title:** "Glotti" in H1, with a subtle gradient text effect (blue → purple)
 - **Subtitle:** "Choose your sparring partner" in text-secondary
 - **Mode Cards (×3):** Each card is a glassmorphism panel (~320px wide, ~360px tall):
   - Large emoji icon (48px) at top
@@ -260,7 +260,7 @@ This document defines the visual design system, screen layouts, and component sp
 These prompts can be used directly with Google Stitch to generate mockup screens.
 
 ### Prompt for Screen 1 (Mode Selection):
-> A dark-themed landing page for "DebatePro", a real-time AI speech coaching app. Deep navy background (#0a0e27). Centered layout with a gradient text logo "DebatePro" at top. Subtitle "Choose your sparring partner" below. Three horizontal glassmorphism cards with rounded corners: (1) 🎯 PitchPerfect - Startup Pitch Coach, (2) 🤝 EmpathyTrainer - Difficult Conversations, (3) ⚔️ Veritalk - Debate Sparring. Each card has an emoji, title, subtitle, and short description. Cards have subtle glass effect with blur and faint white borders. Premium, modern aesthetic similar to a game character selection screen.
+> A dark-themed landing page for "Glotti", a real-time AI speech coaching app. Deep navy background (#0a0e27). Centered layout with a gradient text logo "Glotti" at top. Subtitle "Choose your sparring partner" below. Three horizontal glassmorphism cards with rounded corners: (1) 🎯 PitchPerfect - Startup Pitch Coach, (2) 🤝 EmpathyTrainer - Difficult Conversations, (3) ⚔️ Veritalk - Debate Sparring. Each card has an emoji, title, subtitle, and short description. Cards have subtle glass effect with blur and faint white borders. Premium, modern aesthetic similar to a game character selection screen.
 
 ### Prompt for Screen 2 (Active Session):
 > A dark-themed real-time coaching dashboard for a speech training app. Deep navy background. Top bar shows mode badge "PitchPerfect 🎯" on the left and timer "03:42" on the right. Center: a glowing blue audio waveform visualization spanning full width. Below it: a pulsing circle indicator with text "Listening...". Below that: a row of three glass-effect metric cards showing "7 Fillers", "142 WPM", and a green "Confident" tone badge. At the bottom: a large rounded "End Session" button. The vibe is like a professional audio monitoring studio. Dark, focused, premium.

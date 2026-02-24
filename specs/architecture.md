@@ -1,4 +1,4 @@
-# DebatePro — System Architecture
+# Glotti — System Architecture
 
 ## High-Level Architecture
 

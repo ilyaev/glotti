@@ -30,7 +30,7 @@ wss.on('connection', (ws, req) => {
 
 server.listen(config.port, () => {
   console.log('');
-  console.log('  🎤 DebatePro Server');
+  console.log('  🎤 Glotti Server');
   console.log(`  ➜ http://localhost:${config.port}`);
   console.log(`  ➜ Environment: ${config.isDev ? 'development' : 'production'}`);
   console.log('');

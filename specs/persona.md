@@ -1,6 +1,6 @@
 # Scenarios & Personas Specification
 
-This document details how DebatePro implements its various training scenarios and provide a step-by-step guide for developers to add new personas.
+This document details how Glotti implements its various training scenarios and provide a step-by-step guide for developers to add new personas.
 
 ## 1. Concepts
 
@@ -48,7 +48,7 @@ The client tracks the selected mode in `client/src/App.tsx`. The `ModeSelect` co
 
 ## 3. Guide: Adding a New Persona
 
-Follow these steps to add a new coaching scenario to DebatePro:
+Follow these steps to add a new coaching scenario to Glotti:
 
 ### Step 1: Write the System Prompt
 Create a new markdown file in `server/agents/prompts/` (e.g., `negotiator.md`).
@@ -94,7 +94,7 @@ const modes = [
 ```
 
 #### Custom Icons
-DebatePro supports custom PNG icons for each mode.
+Glotti supports custom PNG icons for each mode.
 *   **Storage**: Place PNG files in `client/public/icons/`.
 *   **Configuration**: Reference the path in the `iconUrl` property (e.g., `/icons/filename.png`).
 *   **Fallback**: If the image fails to load or is missing, the system will automatically fall back to the provided Lucide `icon`.

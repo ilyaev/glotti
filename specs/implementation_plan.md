@@ -1,6 +1,6 @@
-# DebatePro — Implementation Plan
+# Glotti — Implementation Plan
 
-This document provides a step-by-step implementation plan for a coding agent to build the DebatePro application from scratch.
+This document provides a step-by-step implementation plan for a coding agent to build the Glotti application from scratch.
 
 > **Prerequisites:** Read [overview.md](overview.md) and [architecture.md](architecture.md) before starting.
 
@@ -261,7 +261,7 @@ wss.on('connection', (ws, req) => {
 });
 
 server.listen(config.port, () => {
-  console.log(`DebatePro running at http://localhost:${config.port}`);
+  console.log(`Glotti running at http://localhost:${config.port}`);
   console.log(`Environment: ${config.isDev ? 'development' : 'production'}`);
 });
 ```
@@ -562,13 +562,13 @@ Before writing any React components, generate UI mockups using **Google Stitch**
 
 ### Step 3.5.1 — Create a Stitch project
 
-Create a new Stitch project titled "DebatePro" to hold all screen designs.
+Create a new Stitch project titled "Glotti" to hold all screen designs.
 
 ### Step 3.5.2 — Generate Screen 1: Mode Selection
 
 Use the following prompt in Stitch (desktop device type):
 
-> A dark-themed landing page for "DebatePro", a real-time AI speech coaching app. Deep navy background (#0a0e27). Centered layout with a gradient text logo "DebatePro" at top. Subtitle "Choose your sparring partner" below. Three horizontal glassmorphism cards with rounded corners: (1) 🎯 PitchPerfect - Startup Pitch Coach, (2) 🤝 EmpathyTrainer - Difficult Conversations, (3) ⚔️ Veritalk - Debate Sparring. Each card has an emoji, title, subtitle, and short description. Cards have subtle glass effect with blur and faint white borders. Premium, modern aesthetic similar to a game character selection screen.
+> A dark-themed landing page for "Glotti", a real-time AI speech coaching app. Deep navy background (#0a0e27). Centered layout with a gradient text logo "Glotti" at top. Subtitle "Choose your sparring partner" below. Three horizontal glassmorphism cards with rounded corners: (1) 🎯 PitchPerfect - Startup Pitch Coach, (2) 🤝 EmpathyTrainer - Difficult Conversations, (3) ⚔️ Veritalk - Debate Sparring. Each card has an emoji, title, subtitle, and short description. Cards have subtle glass effect with blur and faint white borders. Premium, modern aesthetic similar to a game character selection screen.
 
 **Review & iterate:** Adjust colors, card proportions, and typography until satisfied. Generate variants if needed.
 
@@ -690,7 +690,7 @@ const modes = [
 export function ModeSelect({ onStart }: Props) {
   return (
     <div className="mode-select">
-      <h1>DebatePro</h1>
+      <h1>Glotti</h1>
       <p>Choose your sparring partner</p>
       <div className="mode-cards">
         {modes.map((m) => (

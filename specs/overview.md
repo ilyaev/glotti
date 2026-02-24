@@ -1,8 +1,8 @@
-# DebatePro — Project Overview
+# Glotti — Project Overview
 
 ## Vision
 
-**DebatePro** is a real-time AI sparring partner that coaches users through high-stakes verbal interactions — pitches, negotiations, debates, and difficult conversations. Unlike passive post-hoc feedback tools, DebatePro **interrupts you mid-sentence** with challenges, corrections, and coaching cues, forcing you to adapt under pressure exactly as you would in a real encounter.
+**Glotti** is a real-time AI sparring partner that coaches users through high-stakes verbal interactions — pitches, negotiations, debates, and difficult conversations. Unlike passive post-hoc feedback tools, Glotti **interrupts you mid-sentence** with challenges, corrections, and coaching cues, forcing you to adapt under pressure exactly as you would in a real encounter.
 
 The core innovation is combining **Gemini Live API's bidirectional audio streaming** with **vision-based body language analysis** to create a coach that both *hears* and *sees* you, delivering feedback at the speed of conversation.
 
@@ -38,7 +38,7 @@ The user enters a **coaching session** by selecting a scenario mode and clicking
 
 ## Scenario Modes (Variants)
 
-DebatePro ships with multiple coaching personas. Each persona has a unique system prompt, interruption strategy, and evaluation rubric.
+Glotti ships with multiple coaching personas. Each persona has a unique system prompt, interruption strategy, and evaluation rubric.
 
 ### Mode 1: "PitchPerfect" — Startup Founder Coach
 - **Persona:** A skeptical venture capitalist.
@@ -72,7 +72,7 @@ DebatePro ships with multiple coaching personas. Each persona has a unique syste
 
 ## Target User Personas
 
-| Persona | Pain Point | How DebatePro Helps |
+| Persona | Pain Point | How Glotti Helps |
 |---|---|---|
 | Startup Founder | Can't afford a pitch coach; doesn't have tough-minded friends to practice with | PitchPerfect mode provides unlimited, brutally honest practice rounds |
 | Customer Success Rep | Struggles with angry customers; escalations damage CSAT scores | EmpathyTrainer mode simulates hostile interactions safely |

@@ -1,10 +1,10 @@
-# DebatePro — Contest Pitch
+# Glotti — Contest Pitch
 
 ---
 
 ## One-Liner
 
-**DebatePro** is a real-time AI sparring partner that doesn't wait for you to finish — it interrupts, challenges, and coaches you mid-sentence, training you to perform under pressure.
+**Glotti** is a real-time AI sparring partner that doesn't wait for you to finish — it interrupts, challenges, and coaches you mid-sentence, training you to perform under pressure.
 
 ---
 
@@ -22,9 +22,9 @@ Current tools — recording + replaying, speeching to a mirror, or post-hoc AI g
 
 ## The Solution
 
-DebatePro creates a **real-time feedback loop** that trains composure, clarity, and persuasion in the moment.
+Glotti creates a **real-time feedback loop** that trains composure, clarity, and persuasion in the moment.
 
-The user selects a scenario — investor pitch, angry customer, adversarial debate — and starts talking. DebatePro:
+The user selects a scenario — investor pitch, angry customer, adversarial debate — and starts talking. Glotti:
 
 1. **Listens** via Gemini Live API's bidirectional audio streaming with sub-second latency.
 2. **Interrupts** naturally using barge-in capability — challenging weak arguments, calling out filler words, or escalating emotional tension to test the user's composure.
@@ -37,7 +37,7 @@ The user selects a scenario — investor pitch, angry customer, adversarial deba
 ## Why This Wins
 
 ### Technical Innovation
-DebatePro is built on **Gemini Live API's barge-in interruption** — the core capability that makes this impossible with any other AI provider. The agent doesn't politely wait — it *talks over you* when it needs to, and *listens* when you talk over it. This is the defining feature of the Live Agents category.
+Glotti is built on **Gemini Live API's barge-in interruption** — the core capability that makes this impossible with any other AI provider. The agent doesn't politely wait — it *talks over you* when it needs to, and *listens* when you talk over it. This is the defining feature of the Live Agents category.
 
 ### Mandatory Tech — All Checked
 
@@ -65,7 +65,7 @@ This solves a real, underserved need across multiple $B+ markets:
 
 ## Demo Script (2 minutes)
 
-> **[0:00 - 0:15]** "Hi, I'm presenting DebatePro — the AI coach that doesn't let you finish a bad sentence."
+> **[0:00 - 0:15]** "Hi, I'm presenting Glotti — the AI coach that doesn't let you finish a bad sentence."
 
 > **[0:15 - 0:30]** *Show the mode selection screen.* "I'll select PitchPerfect mode. This is the skeptical VC."
 
@@ -107,6 +107,6 @@ Two ADK agents run in parallel:
 
 ## The Takeaway
 
-DebatePro isn't another speech review tool. It's the first AI that **fights back in real-time** — turning every practice session into a high-pressure simulation. Built entirely on Google's AI stack, it demonstrates the full power of Gemini Live API: bidirectional audio, interruptible conversation, multimodal vision, and tool-augmented reasoning, all orchestrated by ADK and hosted on Cloud Run.
+Glotti isn't another speech review tool. It's the first AI that **fights back in real-time** — turning every practice session into a high-pressure simulation. Built entirely on Google's AI stack, it demonstrates the full power of Gemini Live API: bidirectional audio, interruptible conversation, multimodal vision, and tool-augmented reasoning, all orchestrated by ADK and hosted on Cloud Run.
 
 **It's not about being perfect. It's about being ready.**

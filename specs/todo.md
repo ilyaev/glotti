@@ -1,4 +1,4 @@
-# DebatePro — Implementation TODO
+# Glotti — Implementation TODO
 
 ## Phase 1: Project Scaffolding
 - [x] Initialize directory structure (client/ + server/)
@@ -25,7 +25,7 @@
 - [x] server/tools/search-tool.ts
 
 ## Phase 3.5: UI Design with Google Stitch
-- [x] Create Stitch project "DebatePro"
+- [x] Create Stitch project "Glotti"
 - [x] Generate Screen 1: Mode Selection
 - [x] Generate Screen 2: Active Session
 - [x] Generate Screen 3: Post-Session Report
