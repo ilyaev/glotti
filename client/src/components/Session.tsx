@@ -12,7 +12,7 @@ interface Props {
 
 export function Session({ mode, onEnd }: Props) {
     const { connect, disconnect, sendBinary, sendJSON, isConnected } = useWebSocket(mode);
-    const { startCapture, stopCapture, playChunk, handleInterrupt, analyserRef } = useAudio(sendBinary);
+    const { initPlayback, startCapture, stopCapture, playChunk, handleInterrupt, analyserRef } = useAudio(sendBinary);
     const [metrics, setMetrics] = useState<MetricSnapshot | null>(null);
     const [cues, setCues] = useState<CoachingCue[]>([]);
     const [elapsed, setElapsed] = useState(0);
@@ -37,8 +37,8 @@ export function Session({ mode, onEnd }: Props) {
                 switch (msg.type) {
                     case 'session_started':
                         console.log(`✅ [Session] Session started: ${msg.sessionId}`);
-                        setStatus('listening');
-                        startCapture();
+                        initPlayback(); // Initialize ear piece (speakers) immediately
+                        setStatus('connecting'); // Wait for AI intro to finish before opening mic
                         break;
                     case 'interrupted':
                         setStatus('interrupted');
@@ -53,6 +53,13 @@ export function Session({ mode, onEnd }: Props) {
                         setCues(prev => [...prev, { text: msg.text, timestamp: msg.timestamp }]);
                         break;
                     case 'turn_complete':
+                        if (!timerRef.current) {
+                            console.log('🎤 [Session] AI intro finished, starting mic and timer');
+                            startCapture();
+                            timerRef.current = window.setInterval(() => {
+                                setElapsed(prev => prev + 1);
+                            }, 1000);
+                        }
                         setStatus(prev => prev === 'ending' ? 'ending' : 'listening');
                         break;
                     case 'report':
@@ -74,10 +81,7 @@ export function Session({ mode, onEnd }: Props) {
             }
         };
 
-        // Start session timer
-        timerRef.current = window.setInterval(() => {
-            setElapsed(prev => prev + 1);
-        }, 1000);
+        // Timer is now started upon the first 'turn_complete'
 
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);

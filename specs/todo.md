@@ -48,9 +48,9 @@
 - [x] server/report.ts — report generation via Gemini API
 
 ## Phase 6: Local Development & Testing
-- [ ] Verify npm run dev starts both servers
-- [ ] Test full session flow (select → session → report)
-- [ ] Test barge-in / interrupt handling
+- [x] Verify npm run dev starts both servers
+- [x] Test full session flow (select → session → report)
+- [x] Test audio/visual sync and layout responsiveness
 
 ## Phase 7: Production Deployment
 - [ ] npm run build (server + client)

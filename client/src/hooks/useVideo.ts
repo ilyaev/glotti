@@ -40,11 +40,14 @@ export function useVideo(sendBinary: (data: ArrayBuffer) => void): UseVideoRetur
         canvasRef.current.toBlob((blob) => {
           if (!blob) return;
           blob.arrayBuffer().then((buffer) => {
-            // Prefix with 0x01 to indicate video frame
-            const prefixed = new Uint8Array(buffer.byteLength + 1);
-            prefixed[0] = 0x01;
-            prefixed.set(new Uint8Array(buffer), 1);
-            sendBinary(prefixed.buffer);
+            // Prefix with JSON header so backend knows it's video
+            const headerString = JSON.stringify({ type: 'video' }) + '\n';
+            const header = new TextEncoder().encode(headerString);
+            const payload = new Uint8Array(header.length + buffer.byteLength);
+            payload.set(header, 0);
+            payload.set(new Uint8Array(buffer), header.length);
+
+            sendBinary(payload.buffer);
           });
         }, 'image/jpeg', 0.7);
       }, 2000);

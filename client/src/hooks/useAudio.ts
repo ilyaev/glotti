@@ -1,6 +1,7 @@
 import { useRef, useCallback } from 'react';
 
 interface UseAudioReturn {
+  initPlayback: () => void;
   startCapture: () => Promise<void>;
   stopCapture: () => void;
   playChunk: (audioData: ArrayBuffer) => void;
@@ -18,6 +19,15 @@ export function useAudio(sendBinary: (data: ArrayBuffer) => void): UseAudioRetur
   const playbackContextRef = useRef<AudioContext | null>(null);
   const nextPlayTimeRef = useRef<number>(0);
   const isPlayingRef = useRef<boolean>(false);
+
+  // Initialize playback context immediately so we can hear the AI before opening the mic
+  const initPlayback = useCallback(() => {
+    if (!playbackContextRef.current) {
+      playbackContextRef.current = new AudioContext({ sampleRate: 24000 });
+      nextPlayTimeRef.current = 0;
+      console.log('🔊 Playback audio context initialized');
+    }
+  }, []);
 
   const startCapture = useCallback(async () => {
     try {
@@ -57,15 +67,19 @@ export function useAudio(sendBinary: (data: ArrayBuffer) => void): UseAudioRetur
         if (audioChunkCount === 1 || audioChunkCount % 50 === 0) {
           console.log(`🎤 [Audio] Captured chunk #${audioChunkCount}: ${pcm.buffer.byteLength} bytes`);
         }
-        sendBinary(pcm.buffer);
+
+        // Prefix with JSON header so backend knows it's audio, not video
+        const headerString = JSON.stringify({ type: 'audio' }) + '\n';
+        const header = new TextEncoder().encode(headerString);
+        const payload = new Uint8Array(header.length + pcm.buffer.byteLength);
+        payload.set(header, 0);
+        payload.set(new Uint8Array(pcm.buffer), header.length);
+
+        sendBinary(payload.buffer);
       };
 
       source.connect(processor);
       processor.connect(context.destination);
-
-      // Init playback context
-      playbackContextRef.current = new AudioContext({ sampleRate: 24000 });
-      nextPlayTimeRef.current = 0;
 
       console.log('🎤 Audio capture started');
     } catch (err) {
@@ -133,5 +147,5 @@ export function useAudio(sendBinary: (data: ArrayBuffer) => void): UseAudioRetur
     console.log('⚡ Playback interrupted');
   }, []);
 
-  return { startCapture, stopCapture, playChunk, handleInterrupt, analyserRef };
+  return { initPlayback, startCapture, stopCapture, playChunk, handleInterrupt, analyserRef };
 }

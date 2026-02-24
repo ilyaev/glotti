@@ -49,6 +49,25 @@
   padding: 0;
 }
 
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 html,
 body {
   height: 100%;
@@ -85,6 +104,16 @@ body {
   animation: fadeUp 0.5s ease-out;
 }
 
+@media (max-width: 768px) {
+  .mode-select {
+    padding: var(--space-md);
+    justify-content: flex-start;
+    padding-top: var(--space-2xl);
+    /* Prevent notch cut-off */
+    overflow-y: auto;
+  }
+}
+
 .mode-select__header {
   text-align: center;
   margin-bottom: var(--space-2xl);
@@ -110,6 +139,14 @@ body {
   display: flex;
   gap: var(--space-lg);
   max-width: 1100px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .mode-cards {
+    flex-direction: column;
+    gap: var(--space-md);
+  }
 }
 
 .mode-card {
@@ -128,6 +165,13 @@ body {
   min-width: 280px;
 }
 
+@media (max-width: 768px) {
+  .mode-card {
+    padding: var(--space-lg);
+    min-width: 0;
+  }
+}
+
 .mode-card:hover {
   border-color: var(--card-accent, var(--accent-blue));
   box-shadow: 0 0 24px rgba(79, 140, 255, 0.15);
@@ -143,6 +187,13 @@ body {
   font-size: 48px;
   display: block;
   margin-bottom: var(--space-md);
+}
+
+@media (max-width: 768px) {
+  .mode-card__icon {
+    font-size: 36px;
+    margin-bottom: var(--space-sm);
+  }
 }
 
 .mode-card__title {
@@ -173,6 +224,17 @@ body {
   padding: var(--space-lg);
   animation: fadeUp 0.3s ease-out;
   overflow-y: auto;
+  max-width: 800px;
+  /* Force the UI into a mobile-ish aspect ratio container */
+  margin: 0 auto;
+  /* Center it on the screen */
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .session {
+    padding: var(--space-md);
+  }
 }
 
 .session__topbar {
@@ -205,6 +267,14 @@ body {
   align-items: center;
   gap: var(--space-md);
   margin: var(--space-lg) 0;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .session__status {
+    margin: var(--space-sm) 0;
+    gap: var(--space-sm);
+  }
 }
 
 .session__status-ring {
@@ -213,6 +283,13 @@ body {
   border-radius: 50%;
   border: 3px solid var(--accent-blue);
   animation: breathe 2s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+  .session__status-ring {
+    width: 60px;
+    height: 60px;
+  }
 }
 
 .session__status--speaking .session__status-ring {
@@ -242,6 +319,13 @@ body {
   width: 100%;
   height: 120px;
   border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .waveform {
+    height: 60px;
+  }
 }
 
 /* ===== Dashboard ===== */
@@ -250,7 +334,19 @@ body {
   gap: var(--space-md);
   justify-content: center;
   flex-wrap: wrap;
+  /* Allow the hint to drop to a new row */
   margin: var(--space-lg) 0;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: var(--space-sm) 0;
+    gap: var(--space-sm);
+    width: 100%;
+  }
 }
 
 .dashboard__metric {
@@ -265,10 +361,25 @@ body {
   min-width: 120px;
 }
 
+@media (max-width: 768px) {
+  .dashboard__metric {
+    padding: var(--space-sm) var(--space-xs);
+    /* Use less horizontal padding */
+    min-width: 0;
+    /* Important for grid items to shrink */
+  }
+}
+
 .dashboard__value {
   font-family: var(--font-display);
   font-size: 42px;
   font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .dashboard__value {
+    font-size: 24px;
+  }
 }
 
 .dashboard__label {
@@ -279,15 +390,29 @@ body {
   margin-top: var(--space-xs);
 }
 
+@media (max-width: 768px) {
+  .dashboard__label {
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+}
+
 .dashboard__hint {
   width: 100%;
   background: var(--bg-glass);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  /* Less vertical padding to reduce height */
   font-size: 14px;
   color: var(--text-secondary);
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .dashboard__hint {
+    grid-column: span 3;
+  }
 }
 
 .tone-badge {
@@ -331,9 +456,17 @@ body {
   margin: var(--space-md) 0;
   flex: 1;
   min-height: 120px;
-  max-height: 240px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  /* Contains the internal scrolling list */
+}
+
+@media (max-width: 768px) {
+  .coaching-feed {
+    margin: var(--space-sm) 0;
+    padding: var(--space-sm);
+  }
 }
 
 .coaching-feed__title {
@@ -451,6 +584,7 @@ body {
   padding: var(--space-md) var(--space-2xl);
   border: 2px solid var(--text-secondary);
   border-radius: var(--radius-full);
+  flex-shrink: 0;
   background: transparent;
   color: var(--text-primary);
   font-size: 16px;

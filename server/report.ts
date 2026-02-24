@@ -4,10 +4,15 @@ import type { MetricSnapshot, SessionReport } from './store.js';
 
 const genai = new GoogleGenAI({ apiKey: config.googleApiKey });
 
+export interface TranscriptEntry {
+  role: 'user' | 'ai';
+  text: string;
+  timestamp: number;
+}
+
 function buildReportPrompt(
   mode: string,
-  userTranscript: string[],
-  aiTranscript: string[],
+  transcript: TranscriptEntry[],
   metrics: MetricSnapshot[],
   durationSeconds: number
 ): string {
@@ -26,21 +31,26 @@ function buildReportPrompt(
       )[0]
     : 'unknown';
 
-  const userSpeech = userTranscript.length > 0
-    ? userTranscript.join('\n')
-    : '(The user did not speak during this session)';
+  const userEntriesCount = transcript.filter(t => t.role === 'user').length;
 
-  const aiSpeech = aiTranscript.length > 0
-    ? aiTranscript.join('\n')
-    : '(No AI responses recorded)';
+  const dialogueScript = transcript.length > 0
+    ? transcript.map(t => {
+        const mins = Math.floor(t.timestamp / 60).toString().padStart(2, '0');
+        const secs = (t.timestamp % 60).toString().padStart(2, '0');
+        const prefix = t.role === 'user' ? '[User]' : '[AI Coach]';
+        return `[${mins}:${secs}] ${prefix}: ${t.text}`;
+      }).join('\n')
+    : '(No dialogue recorded during this session)';
 
   return `
 You are an expert speech coach analyzing a completed coaching session.
 
 IMPORTANT: You must evaluate the USER's performance ONLY, NOT the AI coach.
-The transcript below clearly labels who said what. Lines starting with [User] are
-what the person being coached said. Lines starting with [AI] are what the AI coach said.
-You MUST evaluate ONLY the [User] lines.
+The transcript below is a chronological script of the conversation. Lines starting
+with [User] are what the person being coached said. Lines starting with [AI Coach]
+are what the AI coach said. You MUST evaluate ONLY the [User] lines, but you should
+use the [AI Coach] lines as context to understand the flow and how well the user
+responded to pressure or questions.
 
 If the user did not speak or said very little, score them LOW (1-3) and provide
 constructive feedback encouraging them to actively participate.
@@ -48,17 +58,14 @@ constructive feedback encouraging them to actively participate.
 MODE: ${mode}
 DURATION: ${durationSeconds} seconds
 
-=== USER'S SPEECH (evaluate THIS) ===
-${userSpeech}
-
-=== AI COACH'S SPEECH (context only, do NOT evaluate) ===
-${aiSpeech}
+=== FULL SESSION DIALOGUE SCRIPT ===
+${dialogueScript}
 
 USER'S AGGREGATED METRICS:
 - Total filler words used by user: ${totalFillers}
 - Average words per minute: ${avgWpm}
 - Dominant tone: ${dominantTone}
-- User transcript entries: ${userTranscript.length}
+- Total times user spoke: ${userEntriesCount}
 
 Generate a detailed performance report evaluating the USER's speaking performance
 as a JSON object with this exact structure:
@@ -68,7 +75,7 @@ as a JSON object with this exact structure:
     "clarity": {"score": <1-10>, "feedback": "<2-3 sentences about the USER's clarity>"},
     "confidence": {"score": <1-10>, "feedback": "<2-3 sentences about the USER's confidence>"},
     "persuasiveness": {"score": <1-10>, "feedback": "<2-3 sentences about the USER's persuasiveness>"},
-    "composure": {"score": <1-10>, "feedback": "<2-3 sentences about the USER's composure>"}
+    "composure": {"score": <1-10>, "feedback": "<2-3 sentences about the USER's composure. Reference specific moments from the dialogue.>"}
   },
   "metrics": {
     "total_filler_words": ${totalFillers},
@@ -77,7 +84,7 @@ as a JSON object with this exact structure:
     "interruption_recovery_avg_ms": <estimated number>
   },
   "key_moments": [
-    {"timestamp": "<mm:ss>", "type": "strength"|"weakness", "note": "<description of USER's moment>"}
+    {"timestamp": "<mm:ss>", "type": "strength"|"weakness", "note": "<description of USER's moment, referencing the dialogue>"}
   ],
   "improvement_tips": ["<tip 1>", "<tip 2>", "<tip 3>"]
 }
@@ -89,14 +96,14 @@ Return ONLY the JSON object, no markdown fences or explanation.
 export async function generateReport(
   sessionId: string,
   mode: string,
-  userTranscript: string[],
-  aiTranscript: string[],
+  transcript: TranscriptEntry[],
   metrics: MetricSnapshot[],
   durationSeconds: number
 ): Promise<SessionReport> {
   try {
-    const prompt = buildReportPrompt(mode, userTranscript, aiTranscript, metrics, durationSeconds);
-    console.log(`   [${sessionId}] Report prompt length: ${prompt.length} chars, user entries: ${userTranscript.length}, ai entries: ${aiTranscript.length}`);
+    const prompt = buildReportPrompt(mode, transcript, metrics, durationSeconds);
+    const userEntriesCount = transcript.filter(t => t.role === 'user').length;
+    console.log(`   [${sessionId}] Report prompt length: ${prompt.length} chars, user entries: ${userEntriesCount}, total turns: ${transcript.length}`);
 
     const response = await genai.models.generateContent({
       model: 'gemini-2.5-flash',

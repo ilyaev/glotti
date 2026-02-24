@@ -5,6 +5,23 @@ import { createStore, type MetricSnapshot } from './store.js';
 import { generateReport } from './report.js';
 import { randomUUID } from 'crypto';
 
+// --- DEBUG LOGGER FOR WEBSOCKET PAYLOADS OUT ---
+// Intercept native WebSocket
+if (typeof globalThis.WebSocket !== 'undefined') {
+  const origSend = globalThis.WebSocket.prototype.send;
+  globalThis.WebSocket.prototype.send = function(data: any) {
+    if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(data);
+        console.error("➡️ [GEMINI WS OUT]:", JSON.stringify(parsed, null, 2));
+      } catch {
+        console.error("➡️ [GEMINI WS OUT]:", data);
+      }
+    }
+    return origSend.call(this, data);
+  };
+}
+
 const genai = new GoogleGenAI({ apiKey: config.googleApiKey });
 const store = createStore();
 
@@ -56,13 +73,13 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
   const mode = modeStr as Mode;
   const sessionId = randomUUID();
   const startedAt = new Date();
-  const userTranscript: string[] = [];  // What the user said
-  const aiTranscript: string[] = [];    // What the AI said
+  const transcript: { role: 'user' | 'ai'; text: string; timestamp: number }[] = [];
   const metrics: MetricSnapshot[] = [];
   let sessionClosed = false;
   let endingSession = false;
   let userTranscriptBuffer = '';
   let aiTranscriptBuffer = '';
+  let audioChunkCount = 0;
 
   console.log(`🎙️  New session: ${sessionId} [${mode}]`);
   console.log(`   System prompt loaded: ${MODES[mode]}`);
@@ -88,6 +105,16 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
             // Log what type of message we received
             if (message.setupComplete) {
               console.log(`   [${sessionId}] ← setupComplete`);
+              // Send initial trigger to get the AI to start speaking
+              try {
+                session.sendClientContent({
+                  turns: [{ role: 'user', parts: [{ text: "Hello! Let's begin the scenario." }] }],
+                  turnComplete: true,
+                });
+                console.log(`   [${sessionId}] Initial greeting sent to trigger AI intro`);
+              } catch (err) {
+                console.error(`   [${sessionId}] Failed to send initial greeting:`, err);
+              }
               return;
             }
 
@@ -109,15 +136,28 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
             if (serverContent.inputTranscription?.text) {
               const text = serverContent.inputTranscription.text;
               userTranscriptBuffer += text;
-              userTranscript.push(text);
 
               // Flush user metrics on sentence boundary or enough words
               const isSentenceEnd = /[.?!]$/.test(userTranscriptBuffer.trim());
               const wordCount = userTranscriptBuffer.trim().split(/\s+/).length;
               if (isSentenceEnd || wordCount >= 10) {
-                console.log(`   [${sessionId}] ← user: "${userTranscriptBuffer.trim().slice(0, 100)}"`);
-                const allUserText = userTranscript.join(' ');
+                const finishedSentence = userTranscriptBuffer.trim();
+                console.log(`   [${sessionId}] ← user: "${finishedSentence.slice(0, 100)}"`);
+
+                // Send to client so it appears in transcript feed
+                if (ws.readyState === ws.OPEN) {
+                  ws.send(JSON.stringify({
+                    type: 'coaching_cue',
+                    text: `[User]: ${finishedSentence}`,
+                    timestamp: Math.round((Date.now() - startedAt.getTime()) / 1000),
+                  }));
+                }
+
                 const elapsed = Math.round((Date.now() - startedAt.getTime()) / 1000);
+                transcript.push({ role: 'user', text: finishedSentence, timestamp: elapsed });
+
+                // We still need all user text concatenated for metrics extraction
+                const allUserText = transcript.filter(t => t.role === 'user').map(t => t.text).join(' ');
                 const metric = extractMetrics(allUserText, elapsed);
                 metrics.push(metric);
                 ws.send(JSON.stringify({ type: 'metrics', data: metric }));
@@ -129,7 +169,6 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
             if (serverContent.outputTranscription?.text) {
               const text = serverContent.outputTranscription.text;
               aiTranscriptBuffer += text;
-              aiTranscript.push(text);
 
               // Flush to client on sentence boundary or enough words
               const isSentenceEnd = /[.?!:"]$/.test(aiTranscriptBuffer.trim());
@@ -142,6 +181,10 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
                   text: flushed,
                   timestamp: Math.round((Date.now() - startedAt.getTime()) / 1000),
                 }));
+
+                const elapsed = Math.round((Date.now() - startedAt.getTime()) / 1000);
+                transcript.push({ role: 'ai', text: flushed, timestamp: elapsed });
+
                 aiTranscriptBuffer = '';
               }
             }
@@ -155,10 +198,10 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
                   ws.send(audioBuffer);
                 }
 
-                // Text response (rare for native audio, but handle it)
+                // Text response (often includes AI's internal "thought process" for this preview model)
+                // We just log it, but do NOT add it to aiTranscript as it's not spoken out loud.
                 if (part.text) {
-                  console.log(`   [${sessionId}] ← text part: "${part.text.slice(0, 100)}"`);
-                  aiTranscript.push(part.text);
+                  console.log(`   [${sessionId}] ← text part (thought): "${part.text.split('\n')[0].slice(0, 100)}..."`);
                 }
               }
             }
@@ -204,23 +247,13 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
       },
       config: {
         responseModalities: [Modality.AUDIO],
-        inputAudioTranscription: {},
         outputAudioTranscription: {},
+        inputAudioTranscription: {},
+        systemInstruction: { parts: [{ text: systemPrompt }] },
       },
     });
 
     console.log(`   [${sessionId}] Session object created, waiting for setupComplete...`);
-
-    // Send system instruction as client content after connection is established
-    try {
-      session.sendClientContent({
-        turns: [{ role: 'user', parts: [{ text: systemPrompt }] }],
-        turnComplete: true,
-      });
-      console.log(`   [${sessionId}] System prompt sent via sendClientContent`);
-    } catch (err) {
-      console.error(`   [${sessionId}] Failed to send system prompt:`, err);
-    }
 
     // Notify client that session is ready
     ws.send(JSON.stringify({ type: 'session_started', sessionId, mode }));
@@ -241,22 +274,51 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
         // Don't forward audio if session is ending
         if (endingSession || sessionClosed) return;
 
-        // Binary data = raw audio or video from browser
-        if (data[0] === 0x01) {
-          const imageData = data.subarray(1);
-          session.sendRealtimeInput({
-            video: {
-              data: imageData.toString('base64'),
-              mimeType: 'image/jpeg',
-            },
-          });
-        } else {
-          session.sendRealtimeInput({
-            audio: {
-              data: data.toString('base64'),
-              mimeType: 'audio/pcm;rate=16000',
-            },
-          });
+        audioChunkCount++;
+
+        // Extract JSON header from binary payload (terminated by \n)
+        const newlineIdx = data.indexOf(10); // \n is 10
+        if (newlineIdx === -1) {
+          console.error(`   [${sessionId}] ❌ Invalid binary payload: no JSON header found`);
+          return;
+        }
+
+        const headerBytes = data.subarray(0, newlineIdx);
+        const rawData = data.subarray(newlineIdx + 1);
+
+        let header;
+        try {
+          header = JSON.parse(headerBytes.toString('utf-8'));
+        } catch {
+          console.error(`   [${sessionId}] ❌ Invalid binary payload: bad JSON header`);
+          return;
+        }
+        if (header.type === 'video') {
+          try {
+            session.sendRealtimeInput({
+              video: {
+                data: rawData.toString('base64'),
+                mimeType: 'image/jpeg',
+              },
+            });
+          } catch (err: any) {
+            console.error(`   [${sessionId}] ❌ Video send error (chunk #${audioChunkCount}):`, err.message || err);
+          }
+        } else if (header.type === 'audio') {
+          const b64 = rawData.toString('base64');
+          if (audioChunkCount <= 3 || audioChunkCount % 100 === 0) {
+            console.log(`   [${sessionId}] → audio #${audioChunkCount}: ${rawData.length} bytes, b64_len=${b64.length}`);
+          }
+          try {
+            session.sendRealtimeInput({
+              audio: {
+                data: b64,
+                mimeType: 'audio/pcm;rate=16000',
+              },
+            });
+          } catch (err: any) {
+            console.error(`   [${sessionId}] ❌ Audio send error (chunk #${audioChunkCount}):`, err.message || err);
+          }
         }
       } catch (err) {
         if (!endingSession) {
@@ -284,7 +346,7 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
       endingSession = true;
 
       const durationSeconds = Math.round((Date.now() - startedAt.getTime()) / 1000);
-      console.log(`⏹️  Session ending: ${sessionId} (duration: ${durationSeconds}s, user entries: ${userTranscript.length}, ai entries: ${aiTranscript.length})`);
+      console.log(`⏹️  Session ending: ${sessionId} (duration: ${durationSeconds}s, entries: ${transcript.length})`);
 
       // Close the Gemini session first
       if (!sessionClosed) {
@@ -297,7 +359,7 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
       // Generate post-session report
       try {
         console.log(`   [${sessionId}] Generating post-session report...`);
-        const report = await generateReport(sessionId, mode, userTranscript, aiTranscript, metrics, durationSeconds);
+        const report = await generateReport(sessionId, mode, transcript, metrics, durationSeconds);
         console.log(`   [${sessionId}] Report generated: overall_score=${report.overall_score}`);
 
         // Save session data
@@ -305,7 +367,7 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
           id: sessionId,
           mode,
           startedAt,
-          transcript: [...userTranscript.map(t => `[User] ${t}`), ...aiTranscript.map(t => `[AI] ${t}`)],
+          transcript: transcript.map(t => `[${t.role === 'user' ? 'User' : 'AI'}] ${t.text}`),
           metrics,
           report,
         });
