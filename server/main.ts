@@ -49,7 +49,8 @@ wss.on('connection', (ws, req) => {
   const url = new URL(req.url!, `http://${req.headers.host}`);
   const mode = url.searchParams.get('mode') || 'pitch_perfect';
   const userId = url.searchParams.get('userId') || 'anonymous';
-  handleConnection(ws, mode, userId);
+  const originalSessionId = url.searchParams.get('originalSessionId');
+  handleConnection(ws, mode, userId, originalSessionId);
 });
 
 server.listen(config.port, () => {

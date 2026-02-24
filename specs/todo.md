@@ -58,3 +58,10 @@
 - [x] Store API key in Secret Manager
 - [x] Deploy to Cloud Run
 - [x] Verify production deployment
+## Phase 8: Partner Feedback & Interactivity
+- [x] Create Partner Feedback agent persona and mode config
+- [x] Implement context-aware feedback (transcript injection)
+- [x] Design and implement Partner Insight Card UI
+- [x] Implement FeedbackModal with live audio & early barge-in
+- [x] Fix audio context synchronization for interruptions
+- [x] Optimize report layout for mobile responsiveness

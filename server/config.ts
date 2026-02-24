@@ -196,6 +196,15 @@ export const MODES: Record<string, ScenarioConfig> = {
       },
     },
   },
+  feedback: {
+    promptFile: 'server/agents/prompts/feedback.md',
+    report: {
+      promptIntro: 'You are providing feedback on a previous session.',
+      categories: {},
+      displayMetrics: [],
+      extraFields: {},
+    },
+  },
 } as const;
 
 export type Mode = keyof typeof MODES;

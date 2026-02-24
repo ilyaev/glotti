@@ -2,7 +2,7 @@ import type { SessionReport, ImpromptuExtra } from '../../types';
 import {
     ScoreGauge, CategoryCards, MetricsStrip,
     KeyMoments, ImprovementTips, ReportActions, Transcript,
-    PartnerInfo,
+    PartnerInfo, PartnerInsightCard
 } from './ReportBase';
 
 interface Props {
@@ -28,6 +28,7 @@ export function ImpromptuReport({ data, onRestart, transcript, sessionId, userId
                 </div>
             )}
             <ScoreGauge score={data.overall_score} />
+            <PartnerInsightCard sessionId={sessionId} userId={userId} voiceName={data.voiceName} />
             <CategoryCards categories={data.categories} />
             <MetricsStrip metrics={data.metrics} displayMetrics={data.displayMetrics} />
             {extra?.silence_gaps_seconds !== undefined && extra.silence_gaps_seconds > 0 && (

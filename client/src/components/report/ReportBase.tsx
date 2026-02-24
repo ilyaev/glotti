@@ -177,6 +177,47 @@ export function Transcript({ lines, aiName }: { lines?: string[]; aiName?: strin
 // ─── Action Buttons ───────────────────────────────────────────────────────────
 
 import { ShareModal } from '../ShareModal';
+import { FeedbackModal } from './FeedbackModal';
+import { Sparkles, Play } from 'lucide-react';
+
+export function PartnerInsightCard({ sessionId, userId, voiceName }: { sessionId?: string; userId?: string; voiceName?: string }) {
+    const [showFeedback, setShowFeedback] = React.useState(false);
+
+    if (!sessionId || !userId) return null;
+
+    return (
+        <>
+            <div className="partner-insight">
+                <div className="partner-insight__content">
+                    <div className="partner-insight__header">
+                        {/* <Sparkles size={16} className="partner-insight__icon" /> */}
+                        <span>Partner Perspective</span>
+                    </div>
+                    <div className="partner-insight__body">
+                        <p className="partner-insight__text">
+                            "{voiceName || 'Your partner'} has some thoughts on this performance. Hear them out or discuss it with them live."
+                        </p>
+                        <button
+                            className="partner-insight__play-btn"
+                            onClick={() => setShowFeedback(true)}
+                        >
+                            <Play size={20} fill="currentColor" />
+                            <span>Listen & Discuss</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {showFeedback && (
+                <FeedbackModal
+                    sessionId={sessionId}
+                    userId={userId}
+                    onClose={() => setShowFeedback(false)}
+                />
+            )}
+        </>
+    );
+}
 
 interface ReportActionsProps {
     onRestart: () => void;

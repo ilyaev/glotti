@@ -25,6 +25,7 @@ export function useAudio(sendBinary: (data: ArrayBuffer) => void): UseAudioRetur
   const initPlayback = useCallback(() => {
     if (!playbackContextRef.current) {
       const ctx = new AudioContext({ sampleRate: 24000 });
+      ctx.resume().catch(console.error); // Ensure context is active
       playbackContextRef.current = ctx;
 
       const analyser = ctx.createAnalyser();
@@ -49,6 +50,7 @@ export function useAudio(sendBinary: (data: ArrayBuffer) => void): UseAudioRetur
       streamRef.current = stream;
 
       const context = new AudioContext({ sampleRate: 16000 });
+      context.resume().catch(console.error);
       contextRef.current = context;
 
       // Create analyser for waveform visualization
@@ -153,8 +155,16 @@ export function useAudio(sendBinary: (data: ArrayBuffer) => void): UseAudioRetur
   const handleInterrupt = useCallback(() => {
     // Stop current playback by resetting the playback context
     if (playbackContextRef.current) {
-      playbackContextRef.current.close();
-      playbackContextRef.current = new AudioContext({ sampleRate: 24000 });
+      playbackContextRef.current.close().catch(console.error);
+      const ctx = new AudioContext({ sampleRate: 24000 });
+      ctx.resume().catch(console.error); // Ensure context is active
+      playbackContextRef.current = ctx;
+
+      // CRITICAL: Must recreate the analyser node for the new context
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 2048;
+      aiAnalyserRef.current = analyser;
+
       nextPlayTimeRef.current = 0;
       isPlayingRef.current = false;
     }

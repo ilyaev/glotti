@@ -83,7 +83,7 @@ function extractMetrics(
   };
 }
 
-export async function handleConnection(ws: WebSocket, modeStr: string, userId: string) {
+export async function handleConnection(ws: WebSocket, modeStr: string, userId: string, originalSessionId?: string | null) {
   // Validate mode
   if (!(modeStr in MODES)) {
     console.error(`❌ Invalid mode: ${modeStr}`);
@@ -97,7 +97,7 @@ export async function handleConnection(ws: WebSocket, modeStr: string, userId: s
   const startedAt = new Date();
   const transcript: { role: 'user' | 'ai'; text: string; timestamp: number }[] = [];
   const metrics: MetricSnapshot[] = [];
-  const voiceName = config.voices[Math.floor(Math.random() * config.voices.length)];
+  let voiceName = config.voices[Math.floor(Math.random() * config.voices.length)];
   let sessionClosed = false;
   let endingSession = false;
   let userTranscriptBuffer = '';
@@ -107,11 +107,43 @@ export async function handleConnection(ws: WebSocket, modeStr: string, userId: s
   let currentHint = '';
   let lastToneCheck = Date.now();
 
+  let systemPrompt = loadPrompt(mode);
+
+  // --- Feedback Mode Context Injection ---
+  if (mode === 'feedback' && originalSessionId) {
+    console.log(`🔍 [Feedback] Fetching original session: ${originalSessionId}`);
+    try {
+      const originalSession = await store.get(originalSessionId);
+      if (originalSession) {
+         voiceName = (originalSession.voiceName as any) || voiceName; // Keep voice consistency
+         const transcriptSummary = originalSession.transcript.slice(-20).join('\n'); // Last 20 lines
+         const reportSummary = originalSession.report
+            ? `Report Summary: Overall Score ${originalSession.report.overall_score}/10. Categories: ${Object.entries(originalSession.report.categories).map(([k, v]: [string, any]) => `${k}:${v.score}`).join(', ')}`
+            : '';
+
+         const contextInjection = `
+## ORIGINAL SESSION CONTEXT
+Below is the content and metrics from the session you are providing feedback on.
+MODE: ${originalSession.mode}
+${reportSummary}
+
+TRANSCRIPT (Last 20 lines):
+${transcriptSummary}
+`;
+         systemPrompt = contextInjection + '\n' + systemPrompt;
+         console.log(`✅ [Feedback] Context injected for session ${originalSessionId}`);
+      } else {
+         console.warn(`⚠️ [Feedback] Original session ${originalSessionId} not found in store.`);
+      }
+    } catch (err) {
+      console.error(`❌ [Feedback] Error fetching original session:`, err);
+    }
+  }
+
   console.log(`🎙️  New session: ${sessionId} [${mode}] (Voice: ${voiceName})`);
   console.log(`   System prompt loaded: ${MODES[mode].promptFile}`);
 
   try {
-    const systemPrompt = loadPrompt(mode);
     console.log(`   Prompt length: ${systemPrompt.length} chars`);
     console.log(`   Connecting to Gemini Live API (${config.geminiModel})...`);
 
@@ -373,8 +405,8 @@ export async function handleConnection(ws: WebSocket, modeStr: string, userId: s
           }
         } else if (header.type === 'audio') {
           const b64 = rawData.toString('base64');
-          if (audioChunkCount <= 3 || audioChunkCount % 100 === 0) {
-            console.log(`   [${sessionId}] → audio #${audioChunkCount}: ${rawData.length} bytes, b64_len=${b64.length}`);
+          if (audioChunkCount <= 3 || audioChunkCount % 100 === 0 || (mode === 'feedback' && audioChunkCount < 20)) {
+            console.log(`   [${sessionId}] → audio #${audioChunkCount}: ${rawData.length} bytes, b64_len=${b64.length} (mode: ${mode})`);
           }
           try {
             session.sendRealtimeInput({
@@ -407,6 +439,17 @@ export async function handleConnection(ws: WebSocket, modeStr: string, userId: s
       console.error(`   [${sessionId}] WebSocket error:`, err);
     });
 
+    // Hard 60s timeout for feedback sessions
+    if (mode === 'feedback') {
+      setTimeout(() => {
+        if (!endingSession && !sessionClosed) {
+          console.log(`⏱️ [Feedback] Session ${sessionId} timed out (60s limit reached)`);
+          ws.send(JSON.stringify({ type: 'error', message: 'Feedback session time limit (1 min) reached.' }));
+          endSession();
+        }
+      }, 60000);
+    }
+
     // End session function
     async function endSession() {
       if (endingSession) return;
@@ -423,7 +466,12 @@ export async function handleConnection(ws: WebSocket, modeStr: string, userId: s
         sessionClosed = true;
       }
 
-      // Generate post-session report
+      // Generate post-session report (SKIP for feedback mode)
+      if (mode === 'feedback') {
+        console.log(`   [${sessionId}] Skipping report generation for feedback mode.`);
+        return;
+      }
+
       try {
         console.log(`   [${sessionId}] Generating post-session report...`);
         const report = await generateReport(sessionId, mode, transcript, metrics, durationSeconds, voiceName);

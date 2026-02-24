@@ -150,8 +150,9 @@ export const MODES: Record<string, ScenarioConfig> = { ... };
 ### Phase 4: Frontend Awareness (`client/`)
 
 1. The report page already renders `categories` dynamically (it iterates the keys). Scenario-specific categories will render without changes if the UI is already generic.
-2. Add a `ReportExtras` component that renders the `extra` field in a human-readable way — initially can be a simple key-value display, with dedicated sub-components per scenario added later.
-3. The report page title / intro copy should reflect the mode (e.g., "Your Pitch Evaluation" instead of "Session Report").
+2. **Partner Insight Card**: Integrated a new `PartnerInsightCard` component. This serves as the new entry point for interactive audio feedback ("Listen & Discuss"), providing a more premium and mobile-friendly experience.
+3. Add a `ReportExtras` component that renders the `extra` field in a human-readable way.
+4. The report page title / intro copy should reflect the mode.
 
 ---
 

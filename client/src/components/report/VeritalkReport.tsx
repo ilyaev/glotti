@@ -2,7 +2,7 @@ import type { SessionReport, VeritalkExtra } from '../../types';
 import {
     ScoreGauge, CategoryCards, MetricsStrip,
     KeyMoments, ImprovementTips, ReportActions, Transcript,
-    PartnerInfo,
+    PartnerInfo, PartnerInsightCard
 } from './ReportBase';
 
 interface Props {
@@ -22,6 +22,7 @@ export function VeritalkReport({ data, onRestart, transcript, sessionId, userId,
             <PartnerInfo voiceName={data.voiceName} roleHint="Rhetorical Opponent" />
             {/* <p className="report__subtitle">Rhetorical Response Analysis</p> */}
             <ScoreGauge score={data.overall_score} />
+            <PartnerInsightCard sessionId={sessionId} userId={userId} voiceName={data.voiceName} />
             {(extra?.strongest_moment || extra?.weakest_moment) && (
                 <div className="report__highlight-row">
                     {extra.strongest_moment && (
