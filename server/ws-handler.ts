@@ -107,7 +107,7 @@ export async function handleConnection(ws: WebSocket, modeStr: string, userId: s
   let lastToneCheck = Date.now();
 
   console.log(`🎙️  New session: ${sessionId} [${mode}]`);
-  console.log(`   System prompt loaded: ${MODES[mode]}`);
+  console.log(`   System prompt loaded: ${MODES[mode].promptFile}`);
 
   try {
     const systemPrompt = loadPrompt(mode);

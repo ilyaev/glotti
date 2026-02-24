@@ -15,21 +15,197 @@ export const config = {
   isDev: process.env.NODE_ENV !== 'production',
 };
 
-export const MODES = {
-  pitch_perfect: 'server/agents/prompts/pitch-perfect.md',
-  empathy_trainer: 'server/agents/prompts/empathy-trainer.md',
-  veritalk: 'server/agents/prompts/veritalk.md',
-  impromptu: 'server/agents/prompts/impromptu.md',
+// ─── Report Config Types ─────────────────────────────────────────────────────
+
+export interface ReportCategory {
+  label: string;
+  description: string; // Injected into the AI prompt to define what to score
+}
+
+/** Names of the metrics keys from SessionReport.metrics that are relevant for this mode */
+export type MetricKey =
+  | 'total_filler_words'
+  | 'avg_words_per_minute'
+  | 'dominant_tone'
+  | 'interruption_recovery_avg_ms'
+  | 'avg_talk_ratio'
+  | 'avg_clarity_score';
+
+export interface ScenarioReportConfig {
+  /** AI evaluator framing — replaces generic "expert specialist" */
+  promptIntro: string;
+  /** Evaluation categories with descriptions for the AI */
+  categories: Record<string, ReportCategory>;
+  /** Which standard metric keys to include in the report */
+  displayMetrics: MetricKey[];
+  /** Additional top-level fields the AI should produce (described in English) */
+  extraFields: Record<string, string>;
+}
+
+export interface ScenarioConfig {
+  promptFile: string;
+  report: ScenarioReportConfig;
+}
+
+// ─── Mode Definitions ────────────────────────────────────────────────────────
+
+export const MODES: Record<string, ScenarioConfig> = {
+  pitch_perfect: {
+    promptFile: 'server/agents/prompts/pitch-perfect.md',
+    report: {
+      promptIntro:
+        'You are a senior venture capitalist evaluating a founder\'s pitch. Your job is to score the quality of the investment thesis, not general speaking ability. Be direct, specific, and reference moments from the transcript.',
+      categories: {
+        problem_clarity: {
+          label: 'Problem Clarity',
+          description: 'Did the user make a clear, urgent, and credible case for the problem they are solving?',
+        },
+        solution_strength: {
+          label: 'Solution Strength',
+          description: 'Was the proposed solution compelling, differentiated, and clearly explained?',
+        },
+        market_articulation: {
+          label: 'Market Opportunity',
+          description: 'Did the user convincingly articulate the addressable market (TAM/SAM/SOM) with credible numbers?',
+        },
+        handling_pressure: {
+          label: 'Handling Tough Questions',
+          description: 'How effectively did the user respond to interruptions, challenges, and hard follow-up questions?',
+        },
+        delivery: {
+          label: 'Delivery & Conviction',
+          description: 'Did the user sound confident, avoid excessive filler words, and maintain an appropriate speaking pace?',
+        },
+      },
+      displayMetrics: ['total_filler_words', 'avg_words_per_minute', 'dominant_tone', 'interruption_recovery_avg_ms'],
+      extraFields: {
+        pitch_structure_score:
+          'A number 1-10 rating how well the pitch followed the classic structure: Problem → Solution → Market → Business Model → Ask.',
+        recommended_next_step:
+          'One concrete, actionable next step the person should take before their next pitch (string).',
+      },
+    },
+  },
+
+  empathy_trainer: {
+    promptFile: 'server/agents/prompts/empathy-trainer.md',
+    report: {
+      promptIntro:
+        'You are a communication psychologist and conflict resolution expert evaluating how well the user handled a difficult emotional conversation. Focus on emotional intelligence — validation, active listening, and de-escalation — not speaking mechanics.',
+      categories: {
+        empathy: {
+          label: 'Empathy',
+          description: 'Did the user validate the other person\'s feelings and show genuine understanding? Did they avoid dismissive language like "calm down" or "it\'s not that bad"?',
+        },
+        active_listening: {
+          label: 'Active Listening',
+          description: 'Did the user ask good open-ended questions, leave space for the other person to speak, and reflect back what they heard?',
+        },
+        de_escalation: {
+          label: 'De-escalation',
+          description: 'Did the emotional temperature of the conversation decrease over time? Did the user\'s language contribute to calming the situation?',
+        },
+        language_quality: {
+          label: 'Language Precision',
+          description: 'Did the user avoid toxic patterns? Look for: overuse of "but" (negating prior empathy), "I" statements instead of "you" statements, defensive phrasing.',
+        },
+      },
+      displayMetrics: ['avg_talk_ratio', 'dominant_tone', 'total_filler_words'],
+      extraFields: {
+        escalation_moments:
+          'An array of timestamp strings (mm:ss format) where the conversation escalated or the user said something that made the situation worse.',
+        best_empathy_phrases:
+          'An array of short string quotes from the user\'s actual dialogue that were the most effective empathetic responses.',
+        alternative_phrases:
+          'An array of strings, each being a specific suggestion: "Instead of [what they said], try: [better alternative]".',
+      },
+    },
+  },
+
+  veritalk: {
+    promptFile: 'server/agents/prompts/veritalk.md',
+    report: {
+      promptIntro:
+        'You are a debate coach and logician evaluating the user\'s argumentative performance. Focus on the quality of reasoning, evidence, and resilience under intellectual pressure. Reference specific exchanges from the transcript.',
+      categories: {
+        argument_coherence: {
+          label: 'Argument Coherence',
+          description: 'Was the user\'s main thesis clear? Did they defend it consistently throughout the session without contradicting themselves?',
+        },
+        evidence_quality: {
+          label: 'Evidence Quality',
+          description: 'Did the user support their claims with specific facts, statistics, examples, or credible sources? Or did they rely on vague assertions?',
+        },
+        logical_soundness: {
+          label: 'Logical Soundness',
+          description: 'Did the user reason without logical fallacies? Look for: straw man, ad hominem, false equivalence, appeal to authority, circular reasoning.',
+        },
+        interruption_recovery: {
+          label: 'Interruption Recovery',
+          description: 'When challenged or interrupted, how quickly and effectively did the user regain composure and return to their argument?',
+        },
+      },
+      displayMetrics: ['interruption_recovery_avg_ms', 'avg_words_per_minute', 'dominant_tone', 'avg_clarity_score'],
+      extraFields: {
+        fallacies_detected:
+          'An array of objects: { "name": string (fallacy name), "timestamp": string (mm:ss), "quote": string (the user\'s words) }. Empty array if none found.',
+        missed_counter_arguments:
+          'An array of strings: arguments or angles the user should have anticipated or addressed but did not.',
+        strongest_moment:
+          'A string describing the user\'s single strongest argumentative moment, including the timestamp and a short quote.',
+        weakest_moment:
+          'A string describing the user\'s single weakest argumentative moment, including the timestamp and a short quote.',
+      },
+    },
+  },
+
+  impromptu: {
+    promptFile: 'server/agents/prompts/impromptu.md',
+    report: {
+      promptIntro:
+        'You are an impromptu speaking and improv coach evaluating the user\'s ability to speak clearly and coherently on an unexpected topic with no preparation time. Focus on structure, spontaneous creativity, and composure.',
+      categories: {
+        topic_adherence: {
+          label: 'Topic Adherence',
+          description: 'Did the user stay on the assigned topic throughout? Did their response feel relevant to the prompt they were given?',
+        },
+        structure: {
+          label: 'Speech Structure',
+          description: 'Did the response have a recognizable arc: a clear opening, a developed body, and a close or conclusion? Or did it trail off or meander?',
+        },
+        confidence: {
+          label: 'Confidence & Presence',
+          description: 'Did the user sound assured and in control? How did they handle silences, hesitations, and unexpected moments?',
+        },
+        originality: {
+          label: 'Originality',
+          description: 'Did the user bring a fresh angle, memorable metaphors, or surprising examples? Or did they resort to the most obvious interpretation?',
+        },
+      },
+      displayMetrics: ['total_filler_words', 'avg_words_per_minute', 'dominant_tone'],
+      extraFields: {
+        assigned_topic:
+          'The exact topic that was assigned to the user at the start of this session (a string extracted from the AI\'s opening message).',
+        best_moment_quote:
+          'A short string quoting or describing the user\'s strongest 10–15 seconds of speech verbatim.',
+        next_challenge:
+          'One specific, actionable skill for the user to focus on in their next impromptu session (string).',
+        silence_gaps_seconds:
+          'An estimated number representing the total seconds the user spent in silence or clearly struggling to find words.',
+      },
+    },
+  },
 } as const;
 
 export type Mode = keyof typeof MODES;
 
 export function loadPrompt(mode: Mode): string {
-  // In production, the compiled file is at /app/dist/server/config.js
-  // The prompts are at /app/server/agents/prompts/
-  // So we need to go up two levels (dist/server) to reach the root /app/
   const isProd = process.env.NODE_ENV === 'production';
   const rootDir = isProd ? join(__dirname, '..', '..') : join(__dirname, '..');
-  const promptPath = join(rootDir, MODES[mode]);
+  const promptPath = join(rootDir, MODES[mode].promptFile);
   return readFileSync(promptPath, 'utf-8');
+}
+
+export function getReportConfig(mode: Mode): ScenarioReportConfig {
+  return MODES[mode].report;
 }

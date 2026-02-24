@@ -24,9 +24,58 @@ export interface SessionReport {
   };
   key_moments: Array<{ timestamp: string; type: 'strength' | 'weakness'; note: string }>;
   improvement_tips: string[];
+  /** Scenario-specific extra data */
+  extra?: Record<string, unknown>;
+  /** Which metric keys from `metrics` are relevant for this mode */
+  displayMetrics?: string[];
 }
 
 export interface TranscriptCue {
   text: string;
   timestamp: number;
+}
+
+// ─── Extra field types per scenario ──────────────────────────────────────────
+
+export interface PitchPerfectExtra {
+  pitch_structure_score: number;
+  recommended_next_step: string;
+}
+
+export interface EmpathyTrainerExtra {
+  escalation_moments: string[];
+  best_empathy_phrases: string[];
+  alternative_phrases: string[];
+}
+
+export interface VeritalkExtra {
+  fallacies_detected: Array<{ name: string; timestamp: string; quote: string }>;
+  missed_counter_arguments: string[];
+  strongest_moment: string;
+  weakest_moment: string;
+}
+
+export interface ImpromptuExtra {
+  assigned_topic: string;
+  best_moment_quote: string;
+  next_challenge: string;
+  silence_gaps_seconds: number;
+}
+
+// ─── Session history types ────────────────────────────────────────────────────
+
+export interface SessionSummary {
+  id: string;
+  mode: string;
+  startedAt: string; // ISO string
+  duration_seconds: number;
+  overall_score: number;
+}
+
+export interface SessionFull {
+  id: string;
+  mode: string;
+  startedAt: string;
+  transcript: string[];
+  report: SessionReport;
 }

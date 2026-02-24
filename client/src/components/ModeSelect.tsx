@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react';
 import type { Mode } from '../App';
+import { navigateTo } from '../App';
 import { Target, Handshake, Swords, Zap, ArrowRight } from 'lucide-react';
 
 interface Props {
     onStart: (mode: Mode) => void;
+    userId: string;
 }
 
 const modes = [
@@ -45,21 +48,23 @@ const modes = [
 ];
 
 const steps = [
-    {
-        title: 'Choose a Persona',
-        desc: 'Pick a sparring partner built for your high-stakes goal.'
-    },
-    {
-        title: 'Speak Naturally',
-        desc: 'Talk to the AI; it will listen, challenge, and intervene in real-time.'
-    },
-    {
-        title: 'Master the Moment',
-        desc: 'Get a data-driven training report to refine your communication.'
-    }
+    { title: 'Choose a Persona', desc: 'Pick a sparring partner built for your high-stakes goal.' },
+    { title: 'Speak Naturally', desc: 'Talk to the AI; it will listen, challenge, and intervene in real-time.' },
+    { title: 'Master the Moment', desc: 'Get a data-driven training report to refine your communication.' },
 ];
 
-export function ModeSelect({ onStart }: Props) {
+export function ModeSelect({ onStart, userId }: Props) {
+    const [sessionCount, setSessionCount] = useState<number>(0);
+
+    useEffect(() => {
+        if (!userId) return;
+        const apiBase = import.meta.env.VITE_API_URL ?? '';
+        fetch(`${apiBase}/api/sessions?userId=${encodeURIComponent(userId)}`)
+            .then(r => r.ok ? r.json() : [])
+            .then((data: unknown[]) => setSessionCount(data.length))
+            .catch(() => {/* silently ignore */ });
+    }, [userId]);
+
     return (
         <div className="mode-select">
             <div className="mode-select__header">
@@ -80,6 +85,7 @@ export function ModeSelect({ onStart }: Props) {
 
                 <p className="subtitle">Choose your sparring partner to begin</p>
             </div>
+
             <div className="mode-cards">
                 {modes.map((m) => (
                     <button
@@ -95,7 +101,6 @@ export function ModeSelect({ onStart }: Props) {
                                     alt={m.title}
                                     className="mode-card__image-icon"
                                     onError={(e) => {
-                                        // Fallback to Lucide icon if image fails to load
                                         (e.target as HTMLImageElement).style.display = 'none';
                                         (e.target as HTMLImageElement).parentElement!.querySelector('.lucide-icon-fallback')!.removeAttribute('style');
                                     }}
@@ -118,6 +123,19 @@ export function ModeSelect({ onStart }: Props) {
                     </button>
                 ))}
             </div>
+
+            {/* Sessions link — bottom of content on mobile, absolute top-right on desktop */}
+            {sessionCount > 0 && (
+                <div className="home-sessions-bar">
+                    <button
+                        className="home-sessions-btn"
+                        onClick={() => navigateTo('sessions')}
+                    >
+                        <span className="home-sessions-btn__label">Past Sessions</span>
+                        <span className="home-sessions-btn__count">{sessionCount}</span>
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

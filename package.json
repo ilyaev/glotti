@@ -14,11 +14,12 @@
         "deploy": "npm run build:server && npm run deploy:backend"
     },
     "dependencies": {
-        "@google/genai": "^1.0.0",
         "@google-cloud/firestore": "^7.0.0",
+        "@google/genai": "^1.0.0",
+        "dotenv": "^16.4.0",
         "express": "^5.0.0",
         "ws": "^8.18.0",
-        "dotenv": "^16.4.0"
+        "zod": "^4.3.6"
     },
     "devDependencies": {
         "@types/express": "^5.0.0",

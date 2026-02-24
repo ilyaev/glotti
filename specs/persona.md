@@ -104,6 +104,66 @@ If your persona requires specific real-time heuristics, add logic to `extractMet
 
 ---
 
+### Step 6: Configure the Session Report
+
+Each scenario defines its own post-session report through the `report` field inside its `ScenarioConfig` in `server/config.ts`. This controls the AI evaluator framing, scoring categories, which metrics are shown, and any extra data fields specific to your scenario.
+
+#### `ScenarioReportConfig` fields
+
+| Field | Type | Purpose |
+|---|---|---|
+| `promptIntro` | `string` | The opening paragraph of the report generation prompt. Tells the AI what role to adopt (e.g., "You are a debate coach..."). Be specific about the evaluation lens. |
+| `categories` | `Record<string, ReportCategory>` | Named scoring dimensions. The key becomes the JSON field name, `label` is the display name, `description` is injected into the prompt so the AI knows exactly what to score. |
+| `displayMetrics` | `MetricKey[]` | Which of the 6 standard metrics to show in the report UI. Options: `total_filler_words`, `avg_words_per_minute`, `dominant_tone`, `interruption_recovery_avg_ms`, `avg_talk_ratio`, `avg_clarity_score`. |
+| `extraFields` | `Record<string, string>` | Additional top-level JSON fields the AI should produce. The key is the field name; the value is a plain-English description of what the AI should output (type + content). |
+
+#### Example config for a new `negotiator` scenario
+
+```typescript
+// server/config.ts
+negotiator: {
+  promptFile: 'server/agents/prompts/negotiator.md',
+  report: {
+    promptIntro:
+      'You are a negotiation strategist evaluating a salary or contract negotiation practice session. Focus on tactics, leverage, and concession management.',
+    categories: {
+      opening_position: {
+        label: 'Opening Position',
+        description: 'Did the user anchor high/low appropriately and avoid revealing their BATNA too early?',
+      },
+      concession_management: {
+        label: 'Concession Management',
+        description: 'Did the user make concessions strategically (small, slow, conditional) or cave too quickly?',
+      },
+      active_listening: {
+        label: 'Active Listening',
+        description: 'Did the user pick up on signals and use silence effectively as a negotiation tool?',
+      },
+      closing: {
+        label: 'Closing',
+        description: 'Did the user recognize a closing opportunity and land a clear, favorable agreement?',
+      },
+    },
+    displayMetrics: ['avg_words_per_minute', 'dominant_tone', 'interruption_recovery_avg_ms', 'avg_talk_ratio'],
+    extraFields: {
+      final_outcome: 'A string describing what deal (if any) was reached and whether it favored the user.',
+      missed_tactics: 'An array of strings listing negotiation tactics the user could have employed but did not.',
+      best_leverage_moment: 'A string describing the moment the user used leverage most effectively (with timestamp).',
+    },
+  },
+},
+```
+
+#### Adding a custom report card on the frontend
+
+After defining the config, create a matching React component in `client/src/components/report/`:
+
+1. Create `client/src/components/report/NegotiatorReport.tsx` — use the shared primitives from `ReportBase.tsx` (`ScoreGauge`, `CategoryCards`, `MetricsStrip`, `KeyMoments`, `ImprovementTips`, `ReportActions`) and add any custom sections that render the `extra` fields.
+2. Add a typed interface for the extra fields in `client/src/types.ts` (e.g., `NegotiatorExtra`).
+3. Register the component in `client/src/components/Report.tsx` — add a `case 'negotiator':` to the `switch (data.mode)` statement.
+
+---
+
 ## 4. Prompt Engineering Best Practices
 
 For the best training experience, ensure your system prompts include:

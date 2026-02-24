@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
-import { config } from './config.js';
+import { z } from 'zod';
+import { config, getReportConfig, type Mode, type ScenarioReportConfig } from './config.js';
 import type { MetricSnapshot, SessionReport } from './store.js';
 
 const genai = new GoogleGenAI({ apiKey: config.googleApiKey });
@@ -10,8 +11,78 @@ export interface TranscriptEntry {
   timestamp: number;
 }
 
+// ─── Zod Schemas ─────────────────────────────────────────────────────────────
+
+const CategorySchema = z.object({
+  score: z.number().min(1).max(10),
+  feedback: z.string(),
+});
+
+const KeyMomentSchema = z.object({
+  timestamp: z.string(),
+  type: z.enum(['strength', 'weakness']),
+  note: z.string(),
+});
+
+const MetricsSchema = z.object({
+  total_filler_words: z.number(),
+  avg_words_per_minute: z.number(),
+  dominant_tone: z.string(),
+  interruption_recovery_avg_ms: z.number(),
+  avg_talk_ratio: z.number(),
+  avg_clarity_score: z.number(),
+});
+
+const BaseReportSchema = z.object({
+  overall_score: z.number().min(1).max(10),
+  categories: z.record(z.string(), CategorySchema),
+  metrics: MetricsSchema,
+  key_moments: z.array(KeyMomentSchema),
+  improvement_tips: z.array(z.string()),
+});
+
+// Extra field schemas per scenario
+const PitchPerfectExtraSchema = z.object({
+  pitch_structure_score: z.number().min(1).max(10),
+  recommended_next_step: z.string(),
+});
+
+const EmpathyTrainerExtraSchema = z.object({
+  escalation_moments: z.array(z.string()),
+  best_empathy_phrases: z.array(z.string()),
+  alternative_phrases: z.array(z.string()),
+});
+
+const VeritalkExtraSchema = z.object({
+  fallacies_detected: z.array(z.object({
+    name: z.string(),
+    timestamp: z.string(),
+    quote: z.string(),
+  })),
+  missed_counter_arguments: z.array(z.string()),
+  strongest_moment: z.string(),
+  weakest_moment: z.string(),
+});
+
+const ImpromptuExtraSchema = z.object({
+  assigned_topic: z.string(),
+  best_moment_quote: z.string(),
+  next_challenge: z.string(),
+  silence_gaps_seconds: z.number(),
+});
+
+const EXTRA_SCHEMAS: Record<string, z.ZodTypeAny> = {
+  pitch_perfect: PitchPerfectExtraSchema,
+  empathy_trainer: EmpathyTrainerExtraSchema,
+  veritalk: VeritalkExtraSchema,
+  impromptu: ImpromptuExtraSchema,
+};
+
+// ─── Prompt Building ──────────────────────────────────────────────────────────
+
 function buildReportPrompt(
-  mode: string,
+  mode: Mode,
+  reportConfig: ScenarioReportConfig,
   transcript: TranscriptEntry[],
   metrics: MetricSnapshot[],
   durationSeconds: number
@@ -52,15 +123,27 @@ function buildReportPrompt(
       }).join('\n')
     : '(No dialogue recorded during this session)';
 
+  // Build category schema block for the prompt
+  const categorySchemaBlock = Object.entries(reportConfig.categories)
+    .map(([key, cat]) => `    "${key}": {"score": <1-10>, "feedback": "<2-3 sentences: ${cat.description}>"}`)
+    .join(',\n');
+
+  // Build extra fields block for the prompt
+  const hasExtra = Object.keys(reportConfig.extraFields).length > 0;
+  const extraSchemaLines = Object.entries(reportConfig.extraFields)
+    .map(([key, desc]) => `    "${key}": <${desc}>`)
+    .join(',\n');
+  const extraBlock = hasExtra
+    ? `,\n  "extra": {\n${extraSchemaLines}\n  }`
+    : '';
+
   return `
-You are an expert specialist analyzing a completed training session.
+${reportConfig.promptIntro}
 
 IMPORTANT: You must evaluate the USER's performance ONLY, NOT the AI partner.
 The transcript below is a chronological script of the conversation. Lines starting
 with [User] are what the person being trained said. Lines starting with [AI Partner]
-are what the AI partner said. You MUST evaluate ONLY the [User] lines, but you should
-use the [AI Partner] lines as context to understand the flow and how well the user
-responded to pressure or questions.
+are what the AI partner said. You MUST evaluate ONLY the [User] lines.
 
 If the user did not speak or said very little, score them LOW (1-3) and provide
 constructive feedback encouraging them to actively participate.
@@ -79,15 +162,12 @@ USER'S AGGREGATED METRICS:
 - Dominant tone: ${dominantTone}
 - Total times user spoke: ${userEntriesCount}
 
-Generate a detailed performance report evaluating the USER's speaking performance
+Generate a detailed performance report evaluating the USER's performance
 as a JSON object with this exact structure:
 {
   "overall_score": <number 1-10>,
   "categories": {
-    "clarity": {"score": <1-10>, "feedback": "<2-3 sentences about the USER's clarity>"},
-    "confidence": {"score": <1-10>, "feedback": "<2-3 sentences about the USER's confidence>"},
-    "persuasiveness": {"score": <1-10>, "feedback": "<2-3 sentences about the USER's persuasiveness>"},
-    "composure": {"score": <1-10>, "feedback": "<2-3 sentences about the USER's composure. Reference specific moments from the dialogue.>"}
+${categorySchemaBlock}
   },
   "metrics": {
     "total_filler_words": ${totalFillers},
@@ -100,22 +180,46 @@ as a JSON object with this exact structure:
   "key_moments": [
     {"timestamp": "<mm:ss>", "type": "strength"|"weakness", "note": "<description of USER's moment, referencing the dialogue>"}
   ],
-  "improvement_tips": ["<tip 1>", "<tip 2>", "<tip 3>"]
+  "improvement_tips": ["<tip 1>", "<tip 2>", "<tip 3>"]${extraBlock}
 }
 
 Return ONLY the JSON object, no markdown fences or explanation.
 `;
 }
 
+// ─── Validation ───────────────────────────────────────────────────────────────
+
+function validateReport(mode: Mode, raw: unknown): { base: z.infer<typeof BaseReportSchema>; extra?: Record<string, unknown> } {
+  const base = BaseReportSchema.parse(raw);
+
+  const extraSchema = EXTRA_SCHEMAS[mode];
+  let extra: Record<string, unknown> | undefined;
+  if (extraSchema && typeof raw === 'object' && raw !== null && 'extra' in raw) {
+    try {
+      extra = extraSchema.parse((raw as Record<string, unknown>).extra) as Record<string, unknown>;
+    } catch (err) {
+      console.warn(`   [report] Extra field validation failed for mode ${mode}, using partial:`, err);
+      // Use the raw extra even if validation fails — better than nothing
+      extra = (raw as Record<string, unknown>).extra as Record<string, unknown>;
+    }
+  }
+
+  return { base, extra };
+}
+
+// ─── Report Generation ────────────────────────────────────────────────────────
+
 export async function generateReport(
   sessionId: string,
-  mode: string,
+  mode: Mode,
   transcript: TranscriptEntry[],
   metrics: MetricSnapshot[],
   durationSeconds: number
 ): Promise<SessionReport> {
+  const reportConfig = getReportConfig(mode);
+
   try {
-    const prompt = buildReportPrompt(mode, transcript, metrics, durationSeconds);
+    const prompt = buildReportPrompt(mode, reportConfig, transcript, metrics, durationSeconds);
     const userEntriesCount = transcript.filter(t => t.role === 'user').length;
     console.log(`   [${sessionId}] Report prompt length: ${prompt.length} chars, user entries: ${userEntriesCount}, total turns: ${transcript.length}`);
 
@@ -128,29 +232,34 @@ export async function generateReport(
     });
 
     const text = response.text || '{}';
-    // Strip markdown fences if present
     const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const parsed = JSON.parse(cleaned);
+
+    const { base, extra } = validateReport(mode, parsed);
 
     return {
       session_id: sessionId,
       mode,
       duration_seconds: durationSeconds,
-      ...parsed,
+      ...base,
+      extra,
+      displayMetrics: reportConfig.displayMetrics,
     };
   } catch (error) {
     console.error('Report generation failed:', error);
+
+    // Build fallback using scenario's own category keys
+    const fallbackCategories: Record<string, { score: number; feedback: string }> = {};
+    for (const key of Object.keys(reportConfig.categories)) {
+      fallbackCategories[key] = { score: 5, feedback: 'Report generation failed. Please try again later.' };
+    }
+
     return {
       session_id: sessionId,
       mode,
       duration_seconds: durationSeconds,
       overall_score: 5,
-      categories: {
-        clarity: { score: 5, feedback: 'Report generation failed. Please try again later.' },
-        confidence: { score: 5, feedback: 'Report generation failed. Please try again later.' },
-        persuasiveness: { score: 5, feedback: 'Report generation failed.' },
-        composure: { score: 5, feedback: 'Report generation failed.' },
-      },
+      categories: fallbackCategories,
       metrics: {
         total_filler_words: 0,
         avg_words_per_minute: 0,
@@ -161,6 +270,7 @@ export async function generateReport(
       },
       key_moments: [],
       improvement_tips: ['Unable to generate report. Please try again.'],
+      displayMetrics: reportConfig.displayMetrics,
     };
   }
 }
