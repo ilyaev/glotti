@@ -9,7 +9,9 @@
         "build:server": "tsc",
         "build:client": "cd client && npm run build",
         "build": "npm run build:server && npm run build:client",
-        "start": "node dist/server/main.js"
+        "start": "node dist/server/main.js",
+        "deploy:backend": "gcloud run deploy debatepro-backend --source . --region us-central1 --allow-unauthenticated --set-secrets=\"GEMINI_API_KEY=GEMINI_API_KEY:latest\" --port=8080",
+        "deploy": "npm run build:server && npm run deploy:backend"
     },
     "dependencies": {
         "@google/genai": "^1.0.0",

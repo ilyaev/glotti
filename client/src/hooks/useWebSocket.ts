@@ -15,10 +15,13 @@ export function useWebSocket(mode: string): UseWebSocketReturn {
   const chunkCountRef = useRef(0);
 
   const connect = useCallback(() => {
-    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const url = `${protocol}//${location.host}/ws?mode=${mode}`;
-    console.log(`🔌 [WS] Connecting to ${url}`);
-    const ws = new WebSocket(url);
+    // Default to relative connection (same host) for local dev
+    // If VITE_WS_URL is set, use it for connection to the remote backend
+    const wsUrlStr = import.meta.env.VITE_WS_URL || `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}`;
+    const urlStr = `${wsUrlStr}/ws?mode=${mode}`;
+
+    console.log(`🔌 [WS] Connecting to ${urlStr}`);
+    const ws = new WebSocket(urlStr);
     ws.binaryType = 'arraybuffer';
 
     ws.onopen = () => {

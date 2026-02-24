@@ -15,8 +15,8 @@ const wss = new WebSocketServer({ server });
 // Health check
 app.get('/health', (_, res) => res.json({ status: 'ok', mode: config.isDev ? 'development' : 'production' }));
 
-// In production, serve the Vite-built client files
-if (!config.isDev) {
+// For development, serve the Vite-built client files to support local full-stack testing if needed
+if (config.isDev) {
   app.use(express.static(join(__dirname, '..', 'client-dist')));
 }
 

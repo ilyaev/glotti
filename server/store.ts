@@ -60,19 +60,27 @@ export class FirestoreStore implements SessionStore {
 
   constructor() {
     // Dynamic import to avoid requiring Firestore in dev
-    const { Firestore } = require('@google-cloud/firestore');
-    this.db = new Firestore();
+  }
+
+  private async getDb() {
+    if (!this.db) {
+      const { Firestore } = await import('@google-cloud/firestore');
+      this.db = new Firestore();
+    }
+    return this.db;
   }
 
   async save(session: SessionData) {
-    await this.db.collection('sessions').doc(session.id).set({
+    const db = await this.getDb();
+    await db.collection('sessions').doc(session.id).set({
       ...session,
       startedAt: session.startedAt.toISOString(),
     });
   }
 
   async get(id: string) {
-    const doc = await this.db.collection('sessions').doc(id).get();
+    const db = await this.getDb();
+    const doc = await db.collection('sessions').doc(id).get();
     if (!doc.exists) return null;
     const data = doc.data();
     return { ...data, startedAt: new Date(data.startedAt) } as SessionData;

@@ -8,7 +8,7 @@ dotenv.config();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export const config = {
-  googleApiKey: process.env.GOOGLE_API_KEY!,
+  googleApiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY!,
   googleCloudProject: process.env.GOOGLE_CLOUD_PROJECT,
   geminiModel: 'gemini-2.5-flash-native-audio-preview-12-2025',
   port: parseInt(process.env.PORT || '8080'),
