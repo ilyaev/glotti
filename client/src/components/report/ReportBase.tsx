@@ -178,7 +178,7 @@ export function Transcript({ lines, aiName }: { lines?: string[]; aiName?: strin
 
 import { ShareModal } from '../ShareModal';
 import { FeedbackModal } from './FeedbackModal';
-import { Sparkles, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 
 export function PartnerInsightCard({ sessionId, userId, voiceName }: { sessionId?: string; userId?: string; voiceName?: string }) {
     const [showFeedback, setShowFeedback] = React.useState(false);
@@ -224,9 +224,10 @@ interface ReportActionsProps {
     sessionId?: string;
     userId?: string;
     isShared?: boolean;
+    report?: SessionReport; // Pass down the report for image generation
 }
 
-export function ReportActions({ onRestart, sessionId, userId, isShared }: ReportActionsProps) {
+export function ReportActions({ onRestart, sessionId, userId, isShared, report }: ReportActionsProps) {
     const [shareUrl, setShareUrl] = React.useState<string | null>(null);
 
     const handleShare = async () => {
@@ -251,7 +252,7 @@ export function ReportActions({ onRestart, sessionId, userId, isShared }: Report
             </div>
 
             {shareUrl && (
-                <ShareModal url={shareUrl} onClose={() => setShareUrl(null)} />
+                <ShareModal url={shareUrl} onClose={() => setShareUrl(null)} report={report} />
             )}
         </>
     );

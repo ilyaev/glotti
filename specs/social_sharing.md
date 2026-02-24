@@ -94,3 +94,15 @@ Upgrade the existing `ShareModal.tsx` to include:
 *   **"The AI Certificate":** Generate a "Certificate of Completion" for 10 consecutive sessions with >8/10 score.
 *   **"Roast of the Day":** A feature where users can opt-in to have their funniest AI-critiques featured on a community gallery.
 *   **"Interactive Spectator Mode":** When a user clicks a shared link, allow non-users to click "Listen & Discuss" on the shared report to hear the AI's feedback on the *original* user's session, drawing them into the interactive experience immediately.
+
+---
+
+## 6. Social Sharing & Performance Card Generation Logic
+To enhance organic growth via social triggers, users can share their session evaluation on social media (LinkedIn, Twitter, Facebook) and generate visually appealing performance cards.
+
+### Image Generation Pipeline
+1. **Reporting Data Source**: The `PerformanceCard.tsx` component is dynamically fed the complete `SessionReport` object from the current session (which includes the `overall_score`, individual `metrics`, `improvement_tips`, and the `voiceName` of the AI partner).
+2. **Design Matching**: The visual design of the card mirrors the actual Glotti web app (using the light theme colors like `#fdfbf7`, identical typography, and the SVG score gauge). Interactive elements (buttons, nav bars) are omitted in favor of large, readable text suitable for an image feed.
+3. **Capture Process**: The `ShareModal` uses the `html-to-image` library to render the hidden DOM structure of `PerformanceCard` into a high-resolution 2x pixel ratio PNG data URL client-side.
+4. **Workarounds**: To ensure compatibility with certain browsers (like iOS Safari), the `toPng` action runs twice with a short delay (`skipFonts: true`), which acts to prime the canvas and avoids capturing blank white images.
+5. **Download**: Clicking the "Download" button safely saves `glotti-[mode]-score.png` directly to the user's local device so they can natively attach the image to their social post.

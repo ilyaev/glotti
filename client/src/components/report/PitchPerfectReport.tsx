@@ -48,7 +48,7 @@ export function PitchPerfectReport({ data, onRestart, transcript, sessionId, use
             )}
             <ImprovementTips tips={data.improvement_tips} />
             <Transcript lines={transcript} aiName={data.voiceName} />
-            <ReportActions onRestart={onRestart} sessionId={sessionId} userId={userId} isShared={isShared} />
+            <ReportActions onRestart={onRestart} sessionId={sessionId} userId={userId} isShared={isShared} report={data} />
         </div>
     );
 }

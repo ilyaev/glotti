@@ -80,7 +80,7 @@ export function VeritalkReport({ data, onRestart, transcript, sessionId, userId,
             <KeyMoments moments={data.key_moments} />
             <ImprovementTips tips={data.improvement_tips} />
             <Transcript lines={transcript} aiName={data.voiceName} />
-            <ReportActions onRestart={onRestart} sessionId={sessionId} userId={userId} isShared={isShared} />
+            <ReportActions onRestart={onRestart} sessionId={sessionId} userId={userId} isShared={isShared} report={data} />
         </div>
     );
 }
