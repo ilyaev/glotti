@@ -8,11 +8,12 @@ import { Target, Handshake, Swords, Mic } from 'lucide-react';
 
 interface Props {
     mode: string;
+    userId: string;
     onEnd: (report: SessionReport) => void;
 }
 
-export function Session({ mode, onEnd }: Props) {
-    const { connect, disconnect, sendBinary, sendJSON, isConnected } = useWebSocket(mode);
+export function Session({ mode, userId, onEnd }: Props) {
+    const { connect, disconnect, sendBinary, sendJSON, isConnected } = useWebSocket(mode, userId);
     const { initPlayback, startCapture, stopCapture, playChunk, handleInterrupt, analyserRef } = useAudio(sendBinary);
     const [metrics, setMetrics] = useState<MetricSnapshot | null>(null);
     const [cues, setCues] = useState<CoachingCue[]>([]);

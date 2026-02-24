@@ -24,6 +24,11 @@ export const MODES = {
 export type Mode = keyof typeof MODES;
 
 export function loadPrompt(mode: Mode): string {
-  const promptPath = join(__dirname, '..', MODES[mode]);
+  // In production, the compiled file is at /app/dist/server/config.js
+  // The prompts are at /app/server/agents/prompts/
+  // So we need to go up two levels (dist/server) to reach the root /app/
+  const isProd = process.env.NODE_ENV === 'production';
+  const rootDir = isProd ? join(__dirname, '..', '..') : join(__dirname, '..');
+  const promptPath = join(rootDir, MODES[mode]);
   return readFileSync(promptPath, 'utf-8');
 }

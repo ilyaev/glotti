@@ -24,7 +24,8 @@ if (config.isDev) {
 wss.on('connection', (ws, req) => {
   const url = new URL(req.url!, `http://${req.headers.host}`);
   const mode = url.searchParams.get('mode') || 'pitch_perfect';
-  handleConnection(ws, mode);
+  const userId = url.searchParams.get('userId') || 'anonymous';
+  handleConnection(ws, mode, userId);
 });
 
 server.listen(config.port, () => {

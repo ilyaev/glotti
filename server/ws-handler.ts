@@ -61,13 +61,13 @@ function extractMetrics(
   let hint = llmHint;
   if (!hint) {
     if (mode === 'pitch_perfect' && wpm > 180) {
-      hint = '💡 You are speaking very fast. Take a breath and slow down.';
+      hint = 'You are speaking very fast. Take a breath and slow down.';
     } else if (mode === 'empathy_trainer' && talk_ratio > 65) {
-      hint = '💡 Try to listen more. Let the other person speak.';
+      hint = 'Try to listen more. Let the other person speak.';
     } else if (Object.keys(fillerCounts).length > 0) {
-      hint = `💡 Try reducing filler words like "${Object.keys(fillerCounts)[0]}"`;
+      hint = `Try reducing filler words like "${Object.keys(fillerCounts)[0]}"`;
     } else if (mode === 'veritalk' && !userText.includes('?')) {
-      hint = '💡 Try flipping the defense: ask them a clarifying question.';
+      hint = 'Try flipping the defense: ask them a clarifying question.';
     }
   }
 
@@ -83,7 +83,7 @@ function extractMetrics(
   };
 }
 
-export async function handleConnection(ws: WebSocket, modeStr: string) {
+export async function handleConnection(ws: WebSocket, modeStr: string, userId: string) {
   // Validate mode
   if (!(modeStr in MODES)) {
     console.error(`❌ Invalid mode: ${modeStr}`);
@@ -199,7 +199,7 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
                       try {
                          const json = JSON.parse(res.text || '{}');
                          const newTone = json.tone ? json.tone.trim().replace(/[^a-zA-Z]/g, '') : null;
-                         const newHint = json.hint ? `💡 ${json.hint}` : '';
+                         const newHint = json.hint ? `${json.hint}` : '';
 
                          if (newTone && ws.readyState === ws.OPEN) {
                             currentTone = newTone;
@@ -424,6 +424,7 @@ export async function handleConnection(ws: WebSocket, modeStr: string) {
         // Save session data
         await store.save({
           id: sessionId,
+          userId,
           mode,
           startedAt,
           transcript: transcript.map(t => `[${t.role === 'user' ? 'User' : 'AI'}] ${t.text}`),

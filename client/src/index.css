@@ -247,7 +247,7 @@ body {
 
 @media (max-width: 768px) {
   .session {
-    padding: var(--space-md);
+    padding: var(--space-sm);
   }
 }
 
@@ -315,8 +315,8 @@ body {
 
 @media (max-width: 768px) {
   .session__status {
-    margin: var(--space-sm) 0;
-    gap: var(--space-sm);
+    margin: var(--space-xs) 0;
+    gap: 4px;
   }
 }
 
@@ -345,8 +345,8 @@ body {
 
 @media (max-width: 768px) {
   .session__status-ring {
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
   }
 }
 
@@ -388,7 +388,7 @@ body {
 
 @media (max-width: 768px) {
   .waveform {
-    height: 60px;
+    height: 48px;
   }
 }
 
@@ -399,16 +399,18 @@ body {
   justify-content: center;
   flex-wrap: wrap;
   /* Allow the hint to drop to a new row */
-  margin: var(--space-lg) 0;
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-md);
   flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
   .dashboard {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    margin: var(--space-sm) 0;
-    gap: var(--space-sm);
+    grid-template-columns: repeat(5, 1fr);
+    /* Compact 5-column layout */
+    margin: var(--space-xs) 0;
+    gap: 4px;
     width: 100%;
   }
 }
@@ -418,20 +420,24 @@ body {
   border: 1px solid var(--border-subtle);
   box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-lg);
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-md) var(--space-sm);
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  /* Center content vertically */
   flex: 1 1 0;
   min-width: 100px;
+  min-height: 100px;
+  /* Ensure consistent card height */
 }
 
 @media (max-width: 768px) {
   .dashboard__metric {
-    padding: var(--space-sm) var(--space-xs);
-    /* Use less horizontal padding */
+    padding: 6px 2px;
     min-width: 0;
-    /* Important for grid items to shrink */
+    min-height: 68px;
+    /* Compressed height */
   }
 }
 
@@ -439,11 +445,28 @@ body {
   font-family: var(--font-display);
   font-size: 42px;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  /* Take up available space to center vertically */
+}
+
+/* Slightly smaller for text-based values like Tone */
+.dashboard__value.tone-badge {
+  font-size: 24px;
+  text-align: center;
+  line-height: 1.1;
+  padding: 0;
 }
 
 @media (max-width: 768px) {
   .dashboard__value {
     font-size: 24px;
+  }
+
+  .dashboard__value.tone-badge {
+    font-size: 16px;
   }
 }
 
@@ -452,7 +475,20 @@ body {
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-top: var(--space-xs);
+  margin-top: auto;
+  padding-top: var(--space-sm);
+}
+
+.dashboard__value--good {
+  color: var(--accent-green);
+}
+
+.dashboard__value--warn {
+  color: var(--accent-orange);
+}
+
+.dashboard__value--bad {
+  color: var(--accent-red);
 }
 
 @media (max-width: 768px) {
@@ -524,7 +560,7 @@ body {
   box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-lg);
   padding: var(--space-md);
-  margin: var(--space-md) 0;
+  margin-bottom: var(--space-md);
   flex: 1;
   min-height: 120px;
   display: flex;

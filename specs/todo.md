@@ -53,8 +53,8 @@
 - [x] Test audio/visual sync and layout responsiveness
 
 ## Phase 7: Production Deployment
-- [ ] npm run build (server + client)
-- [ ] Build Docker image
-- [ ] Store API key in Secret Manager
-- [ ] Deploy to Cloud Run
-- [ ] Verify production deployment
+- [x] npm run build (server + client)
+- [x] Build Docker image (multi-stage)
+- [x] Store API key in Secret Manager
+- [x] Deploy to Cloud Run
+- [x] Verify production deployment

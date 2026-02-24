@@ -29,6 +29,7 @@ export interface SessionReport {
 
 export interface SessionData {
   id: string;
+  userId: string;
   mode: string;
   startedAt: Date;
   transcript: string[];
@@ -71,19 +72,36 @@ export class FirestoreStore implements SessionStore {
   }
 
   async save(session: SessionData) {
-    const db = await this.getDb();
-    await db.collection('sessions').doc(session.id).set({
-      ...session,
-      startedAt: session.startedAt.toISOString(),
-    });
+    console.log(`📦 [Firestore] Saving session: ${session.id}...`);
+    try {
+      const db = await this.getDb();
+      await db.collection('sessions').doc(session.id).set({
+        ...session,
+        startedAt: session.startedAt.toISOString(),
+      });
+      console.log(`📦 [Firestore] ✅ Session ${session.id} saved successfully.`);
+    } catch (err) {
+      console.error(`📦 [Firestore] ❌ Error saving session ${session.id}:`, err);
+      throw err;
+    }
   }
 
   async get(id: string) {
-    const db = await this.getDb();
-    const doc = await db.collection('sessions').doc(id).get();
-    if (!doc.exists) return null;
-    const data = doc.data();
-    return { ...data, startedAt: new Date(data.startedAt) } as SessionData;
+    console.log(`📦 [Firestore] Fetching session: ${id}...`);
+    try {
+      const db = await this.getDb();
+      const doc = await db.collection('sessions').doc(id).get();
+      if (!doc.exists) {
+        console.log(`📦 [Firestore] ⚠️ Session ${id} not found.`);
+        return null;
+      }
+      const data = doc.data();
+      console.log(`📦 [Firestore] ✅ Session ${id} retrieved.`);
+      return { ...data, startedAt: new Date(data.startedAt) } as SessionData;
+    } catch (err) {
+      console.error(`📦 [Firestore] ❌ Error fetching session ${id}:`, err);
+      throw err;
+    }
   }
 }
 
