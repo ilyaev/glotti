@@ -1,4 +1,5 @@
 import type { MetricSnapshot } from '../types';
+import { Lightbulb } from 'lucide-react';
 
 interface Props {
     metrics: MetricSnapshot | null;
@@ -34,7 +35,8 @@ export function Dashboard({ metrics }: Props) {
             </div>
             {metrics?.improvement_hint && (
                 <div className="dashboard__hint">
-                    💡 {metrics.improvement_hint}
+                    <Lightbulb size={16} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'text-bottom' }} />
+                    {metrics.improvement_hint}
                 </div>
             )}
         </div>

@@ -4,20 +4,33 @@
    ====================================== */
 
 :root {
-  /* Color palette */
-  --bg-primary: #0a0e27;
-  --bg-secondary: #111638;
-  --bg-glass: rgba(255, 255, 255, 0.05);
-  --accent-blue: #4f8cff;
-  --accent-purple: #8b5cf6;
-  --accent-orange: #ff6b35;
-  --accent-green: #22c55e;
-  --accent-red: #ef4444;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #475569;
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-glow: rgba(79, 140, 255, 0.3);
+  /* Organic Light Theme Color palette */
+  --bg-primary: #fdfbf7;
+  /* Warm off-white */
+  --bg-secondary: #f4f1ea;
+  /* Slightly darker beige for contrast */
+  --bg-glass: rgba(255, 255, 255, 0.6);
+  /* Translucent white */
+  --accent-blue: #5b8782;
+  /* Soft sage/teal */
+  --accent-purple: #c49a6c;
+  /* Warm organic terracotta/gold */
+  --accent-orange: #d97757;
+  /* Muted rust orange */
+  --accent-green: #6c8c62;
+  /* Earthy green */
+  --accent-red: #cc5b5b;
+  /* Muted alert red */
+  --text-primary: #2d3748;
+  /* Dark slate, softer than black */
+  --text-secondary: #718096;
+  /* Medium slate grey */
+  --text-muted: #a0aec0;
+  /* Light slate grey */
+  --border-subtle: rgba(45, 55, 72, 0.1);
+  /* Very faint dark border */
+  --border-glow: rgba(91, 135, 130, 0.2);
+  /* Subtle sage glow */
 
   /* Spacing */
   --space-xs: 4px;
@@ -123,10 +136,8 @@ body {
   font-family: var(--font-display);
   font-size: 56px;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent-blue);
+  /* Removed harsh gradient for organic feel */
   margin-bottom: var(--space-sm);
 }
 
@@ -151,10 +162,9 @@ body {
 
 .mode-card {
   flex: 1;
-  background: var(--bg-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-subtle);
+  background: #ffffff;
+  /* Solid white card for light theme */
+  border: 2px solid var(--bg-secondary);
   border-radius: var(--radius-xl);
   padding: var(--space-xl);
   cursor: pointer;
@@ -163,6 +173,8 @@ body {
   color: var(--text-primary);
   font-family: inherit;
   min-width: 280px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  /* Soft subtle shadow */
 }
 
 @media (max-width: 768px) {
@@ -174,7 +186,7 @@ body {
 
 .mode-card:hover {
   border-color: var(--card-accent, var(--accent-blue));
-  box-shadow: 0 0 24px rgba(79, 140, 255, 0.15);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
   transform: translateY(-4px);
 }
 
@@ -184,9 +196,11 @@ body {
 }
 
 .mode-card__icon {
-  font-size: 48px;
-  display: block;
+  display: flex;
+  justify-content: center;
   margin-bottom: var(--space-md);
+  color: var(--card-accent, var(--accent-blue));
+  /* Icons use the card accent color */
 }
 
 @media (max-width: 768px) {
@@ -245,19 +259,48 @@ body {
 }
 
 .session__mode-badge {
-  background: var(--bg-glass);
-  backdrop-filter: blur(8px);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-full);
   font-size: 14px;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.session__mode-icon {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
 }
 
 .session__timer {
   font-family: var(--font-mono);
   font-size: 24px;
   color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.session__timer--warning {
+  color: var(--accent-red);
+  animation: pulseWarning 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseWarning {
+
+  0%,
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+  }
+
+  50% {
+    opacity: 0.6;
+    text-shadow: none;
+  }
 }
 
 /* ===== Status Indicator ===== */
@@ -350,9 +393,9 @@ body {
 }
 
 .dashboard__metric {
-  background: var(--bg-glass);
-  backdrop-filter: blur(8px);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-lg);
   padding: var(--space-lg) var(--space-xl);
   display: flex;
@@ -399,8 +442,9 @@ body {
 
 .dashboard__hint {
   width: 100%;
-  background: var(--bg-glass);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-md);
   padding: var(--space-sm) var(--space-md);
   /* Less vertical padding to reduce height */
@@ -449,8 +493,9 @@ body {
 
 /* ===== Live Transcript Feed ===== */
 .coaching-feed {
-  background: var(--bg-glass);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-lg);
   padding: var(--space-md);
   margin: var(--space-md) 0;
@@ -546,7 +591,8 @@ body {
 }
 
 .coaching-feed__item--latest {
-  background: rgba(79, 140, 255, 0.08);
+  background: rgba(91, 135, 130, 0.08);
+  /* Soft sage highlight */
   border-left: 2px solid var(--accent-blue);
 }
 
@@ -759,9 +805,9 @@ body {
 }
 
 .report__category-card {
-  background: var(--bg-glass);
-  backdrop-filter: blur(8px);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
 }
@@ -802,8 +848,9 @@ body {
   display: flex;
   justify-content: space-around;
   padding: var(--space-lg);
-  background: var(--bg-glass);
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-lg);
   margin-bottom: var(--space-xl);
 }
@@ -947,13 +994,14 @@ body {
 }
 
 .btn--primary {
-  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  background: var(--accent-blue);
   color: white;
+  box-shadow: 0 4px 6px -1px rgba(91, 135, 130, 0.2);
 }
 
 .btn--primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(79, 140, 255, 0.3);
+  box-shadow: 0 10px 15px -3px rgba(91, 135, 130, 0.3);
 }
 
 .btn--outline {

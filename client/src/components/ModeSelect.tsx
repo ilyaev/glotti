@@ -1,4 +1,5 @@
 import type { Mode } from '../App';
+import { Target, Handshake, Swords } from 'lucide-react';
 
 interface Props {
     onStart: (mode: Mode) => void;
@@ -10,7 +11,7 @@ const modes = [
         title: 'PitchPerfect',
         subtitle: 'Startup Pitch Coach',
         description: 'Face a skeptical VC who will challenge every claim you make.',
-        icon: '🎯',
+        icon: <Target size={48} strokeWidth={1.5} />,
         color: '#4f8cff',
     },
     {
@@ -18,7 +19,7 @@ const modes = [
         title: 'EmpathyTrainer',
         subtitle: 'Difficult Conversations',
         description: 'Practice handling upset customers, struggling employees, and tense situations.',
-        icon: '🤝',
+        icon: <Handshake size={48} strokeWidth={1.5} />,
         color: '#22c55e',
     },
     {
@@ -26,7 +27,7 @@ const modes = [
         title: 'Veritalk',
         subtitle: 'Debate Sparring',
         description: 'Defend your thesis against real-time fact-checks and logical traps.',
-        icon: '⚔️',
+        icon: <Swords size={48} strokeWidth={1.5} />,
         color: '#8b5cf6',
     },
 ];
@@ -35,7 +36,7 @@ export function ModeSelect({ onStart }: Props) {
     return (
         <div className="mode-select">
             <div className="mode-select__header">
-                <h1 className="logo-text">DebatePro</h1>
+                <h1 className="logo-text">Glotti</h1>
                 <p className="subtitle">Choose your sparring partner</p>
             </div>
             <div className="mode-cards">

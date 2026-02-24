@@ -4,6 +4,7 @@ import { useAudio } from '../hooks/useAudio';
 import { Dashboard } from './Dashboard';
 import { Waveform } from './Waveform';
 import type { SessionReport, MetricSnapshot, CoachingCue } from '../types';
+import { Target, Handshake, Swords, Mic } from 'lucide-react';
 
 interface Props {
     mode: string;
@@ -96,6 +97,14 @@ export function Session({ mode, onEnd }: Props) {
         feedEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [cues]);
 
+    // Enforce 3-minute limit (180 seconds)
+    useEffect(() => {
+        if (elapsed >= 180 && status !== 'ending' && status !== 'disconnected') {
+            console.log('⏱️ [Session] 3 minute limit reached. Auto-ending.');
+            handleEnd();
+        }
+    }, [elapsed, status]);
+
     const handleEnd = () => {
         if (endingRef.current) return;
         console.log('⏹️ [Session] Ending session...');
@@ -105,13 +114,13 @@ export function Session({ mode, onEnd }: Props) {
         setStatus('ending');
     };
 
-    const modeLabels: Record<string, { label: string; icon: string }> = {
-        pitch_perfect: { label: 'PitchPerfect', icon: '🎯' },
-        empathy_trainer: { label: 'EmpathyTrainer', icon: '🤝' },
-        veritalk: { label: 'Veritalk', icon: '⚔️' },
+    const modeLabels: Record<string, { label: string; icon: React.ReactNode }> = {
+        pitch_perfect: { label: 'PitchPerfect', icon: <Target size={18} strokeWidth={2} /> },
+        empathy_trainer: { label: 'EmpathyTrainer', icon: <Handshake size={18} strokeWidth={2} /> },
+        veritalk: { label: 'Veritalk', icon: <Swords size={18} strokeWidth={2} /> },
     };
 
-    const modeInfo = modeLabels[mode] || { label: mode, icon: '🎤' };
+    const modeInfo = modeLabels[mode] || { label: mode, icon: <Mic size={18} strokeWidth={2} /> };
 
     // Show loading overlay when generating report
     if (status === 'ending') {
@@ -119,9 +128,10 @@ export function Session({ mode, onEnd }: Props) {
             <div className="session session--ending">
                 <div className="session__topbar">
                     <span className="session__mode-badge">
-                        {modeInfo.icon} {modeInfo.label}
+                        <span className="session__mode-icon">{modeInfo.icon}</span>
+                        {modeInfo.label}
                     </span>
-                    <span className="session__timer">{formatTime(elapsed)}</span>
+                    <span className={`session__timer ${elapsed >= 150 ? 'session__timer--warning' : ''}`}>{formatTime(elapsed)}</span>
                 </div>
 
                 <div className="session__loading">
@@ -151,9 +161,10 @@ export function Session({ mode, onEnd }: Props) {
             {/* Top bar */}
             <div className="session__topbar">
                 <span className="session__mode-badge">
-                    {modeInfo.icon} {modeInfo.label}
+                    <span className="session__mode-icon">{modeInfo.icon}</span>
+                    {modeInfo.label}
                 </span>
-                <span className="session__timer">{formatTime(elapsed)}</span>
+                <span className={`session__timer ${elapsed >= 150 ? 'session__timer--warning' : ''}`}>{formatTime(elapsed)}</span>
             </div>
 
             {/* Waveform */}
