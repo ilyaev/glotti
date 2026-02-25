@@ -1,29 +1,46 @@
-import { useState } from 'react';
-import { Download, Share2, Twitter, Linkedin, Facebook } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Download, Share2, Linkedin, Facebook } from 'lucide-react';
 import type { SessionReport } from '../types';
 
 interface Props {
-    url: string;
+    sessionId: string;
+    userId: string;
     onClose: () => void;
     report?: SessionReport; // Pass report data down for the card
 }
 
-export function ShareModal({ url, onClose, report }: Props) {
+const XIcon = ({ size = 20 }: { size?: number }) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="currentColor"
+    >
+        <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.933zm-1.292 19.49h2.039L6.486 3.24H4.298l13.311 17.403z" />
+    </svg>
+);
+
+export function ShareModal({ sessionId, userId, onClose, report }: Props) {
     const [copied, setCopied] = useState(false);
     const [copiedFb, setCopiedFb] = useState(false);
     const [copiedLi, setCopiedLi] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
+    const [includeTranscript, setIncludeTranscript] = useState(true);
+    const [sessionKey, setSessionKey] = useState<string>('');
+
+    // Key generation sync
+    useEffect(() => {
+        import('../utils/shareKey').then(({ generateShareKey }) => {
+            generateShareKey(sessionId, userId, includeTranscript).then(setSessionKey);
+        });
+    }, [sessionId, userId, includeTranscript]);
+
+    const url = `${window.location.origin}${window.location.pathname}#/sessions/${sessionId}/${sessionKey}`;
 
     const fallbackShareText = `I just scored ${report?.overall_score}/10 on a Glotti ${report?.mode.replace('_', ' ')} session! Check out my performance:`;
     const twitterText = report?.social_share_texts?.twitter_template || fallbackShareText;
     const linkedinText = report?.social_share_texts?.linkedin_template || fallbackShareText;
     const facebookText = report?.social_share_texts?.facebook_template || fallbackShareText;
-
-    // Deriving server-side image URL
-    // URL format expected (from React router): http://domain/#/sessions/:id/:key
-    const match = url.match(/\/sessions\/(.+?)\/(.+?)(?:$|\?)/);
-    const sessionId = match ? match[1] : '';
-    const sessionKey = match ? match[2] : '';
 
     // Safety check: prioritize VITE_API_URL for production (Cloud Run), fallback to local 8080 for dev, else use origin.
     // Ensure we remove any trailing slashes from the environment variable if present.
@@ -106,8 +123,6 @@ export function ShareModal({ url, onClose, report }: Props) {
     };
     // Removed client-side html-to-image effect
 
-    console.log({ twitterText, facebookText, linkedinText })
-
     return (
         <div className="share-modal__backdrop" onClick={handleBackdrop} style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div className="share-modal" style={{ maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', padding: '24px', width: '100%', maxWidth: '400px' }}>
@@ -115,6 +130,19 @@ export function ShareModal({ url, onClose, report }: Props) {
 
                 {/* <div className="share-modal__icon">🔗</div> */}
                 <h2 className="share-modal__title">Share your report</h2>
+
+                <div className="share-modal__toggle-row">
+                    <span className="share-modal__toggle-label">Include full transcript</span>
+                    <label className="share-modal__switch">
+                        <input
+                            type="checkbox"
+                            checked={includeTranscript}
+                            onChange={(e) => setIncludeTranscript(e.target.checked)}
+                        />
+                        <span className="share-modal__switch-slider"></span>
+                    </label>
+                </div>
+
                 <p className="share-modal__subtitle">
                     Anyone with this link can view your session report.
                 </p>
@@ -130,7 +158,7 @@ export function ShareModal({ url, onClose, report }: Props) {
                         className={`share-modal__copy-btn ${copied ? 'share-modal__copy-btn--copied' : ''}`}
                         onClick={handleCopy}
                     >
-                        {copied ? '✓ Copied' : 'Copy'}
+                        {copied ? '✓' : 'Copy'}
                     </button>
                 </div>
 
@@ -154,14 +182,14 @@ export function ShareModal({ url, onClose, report }: Props) {
                 <div className="share-modal__socials" style={{ display: 'flex', gap: '12px', marginTop: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <button
                         className="btn btn--icon"
-                        title="Share on Twitter"
+                        title="Share on X"
                         onClick={() => {
                             const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareGatewayUrl)}&text=${encodeURIComponent(twitterText)}`;
                             openShareWindow(twitterUrl);
                         }}
                         style={{ width: '48px', height: '48px', padding: 0, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}
                     >
-                        <Twitter size={20} />
+                        <XIcon size={18} />
                     </button>
                     <button
                         className="btn btn--icon"
@@ -195,6 +223,15 @@ export function ShareModal({ url, onClose, report }: Props) {
                             <Share2 size={20} />
                         </button>
                     )}
+                    <button
+                        className="btn btn--icon"
+                        title="Download Image"
+                        onClick={handleDownloadCard}
+                        disabled={isDownloading || !serverImageUrl}
+                        style={{ width: '48px', height: '48px', padding: 0, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}
+                    >
+                        <Download size={20} />
+                    </button>
                 </div>
 
                 {/* Manual Social Copy Blocks */}
@@ -203,7 +240,7 @@ export function ShareModal({ url, onClose, report }: Props) {
                         {/* LinkedIn Post Text */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             <div style={{ fontSize: '13px', fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <Linkedin size={14} /> LinkedIn Post Text
+                                LinkedIn Post Text
                             </div>
                             <div className="share-modal__link-row" style={{ alignSelf: 'stretch', background: '#f8fafc', borderRadius: '8px', padding: '1px' }}>
                                 <textarea
@@ -226,7 +263,7 @@ export function ShareModal({ url, onClose, report }: Props) {
                         {/* Facebook Post Text */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             <div style={{ fontSize: '13px', fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <Facebook size={14} /> Facebook Post Text
+                                Facebook Post Text
                             </div>
                             <div className="share-modal__link-row" style={{ alignSelf: 'stretch', background: '#f8fafc', borderRadius: '8px', padding: '1px' }}>
                                 <textarea
@@ -250,15 +287,7 @@ export function ShareModal({ url, onClose, report }: Props) {
 
                 {/* Primary Actions */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '24px', width: '100%' }}>
-                    <button
-                        className="btn btn--outline"
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', borderRadius: '24px', padding: '12px 24px', fontSize: '15px', fontWeight: 600, height: '48px', color: '#334155', borderColor: '#cbd5e1' }}
-                        onClick={handleDownloadCard}
-                        disabled={isDownloading || !serverImageUrl}
-                    >
-                        <Download size={18} />
-                        {isDownloading ? 'Downloading...' : 'Download Image'}
-                    </button>
+
 
                     <button
                         className="share-modal__dismiss"

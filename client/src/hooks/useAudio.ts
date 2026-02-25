@@ -1,5 +1,21 @@
 import { useRef, useCallback } from 'react';
 
+// Global playback context to ensure we can unlock it from a user gesture
+let globalPlaybackContext: AudioContext | null = null;
+let globalAiAnalyser: AnalyserNode | null = null;
+
+export function initGlobalAudio() {
+  if (!globalPlaybackContext) {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    globalPlaybackContext = new AudioContextClass({ sampleRate: 24000 });
+    globalAiAnalyser = globalPlaybackContext.createAnalyser();
+    globalAiAnalyser.fftSize = 2048;
+  }
+  if (globalPlaybackContext.state === 'suspended') {
+    globalPlaybackContext.resume().catch(console.error);
+  }
+}
+
 interface UseAudioReturn {
   initPlayback: () => void;
   startCapture: () => Promise<void>;
@@ -20,21 +36,15 @@ export function useAudio(sendBinary: (data: ArrayBuffer) => void): UseAudioRetur
   const playbackContextRef = useRef<AudioContext | null>(null);
   const nextPlayTimeRef = useRef<number>(0);
   const isPlayingRef = useRef<boolean>(false);
+  const activeSourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
 
   // Initialize playback context immediately so we can hear the AI before opening the mic
   const initPlayback = useCallback(() => {
-    if (!playbackContextRef.current) {
-      const ctx = new AudioContext({ sampleRate: 24000 });
-      ctx.resume().catch(console.error); // Ensure context is active
-      playbackContextRef.current = ctx;
-
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 2048;
-      aiAnalyserRef.current = analyser;
-
-      nextPlayTimeRef.current = 0;
-      console.log('🔊 Playback audio context initialized');
-    }
+    initGlobalAudio();
+    playbackContextRef.current = globalPlaybackContext;
+    aiAnalyserRef.current = globalAiAnalyser;
+    nextPlayTimeRef.current = 0;
+    console.log('🔊 Playback audio context initialized/resumed');
   }, []);
 
   const startCapture = useCallback(async () => {
@@ -106,10 +116,18 @@ export function useAudio(sendBinary: (data: ArrayBuffer) => void): UseAudioRetur
       contextRef.current.close();
       contextRef.current = null;
     }
-    if (playbackContextRef.current) {
-      playbackContextRef.current.close();
-      playbackContextRef.current = null;
-    }
+
+    // Stop any active sources since session is ending
+    activeSourcesRef.current.forEach(source => {
+      try {
+        source.onended = null;
+        source.stop();
+        source.disconnect();
+      } catch (err) { }
+    });
+    activeSourcesRef.current.clear();
+    isPlayingRef.current = false;
+
     console.log('🎤 Audio capture stopped');
   }, []);
 
@@ -142,10 +160,13 @@ export function useAudio(sendBinary: (data: ArrayBuffer) => void): UseAudioRetur
     const now = ctx.currentTime;
     const startTime = Math.max(now, nextPlayTimeRef.current);
     source.start(startTime);
+    activeSourcesRef.current.add(source);
+
     nextPlayTimeRef.current = startTime + buffer.duration;
     isPlayingRef.current = true;
 
     source.onended = () => {
+      activeSourcesRef.current.delete(source);
       if (nextPlayTimeRef.current <= ctx.currentTime + 0.01) {
         isPlayingRef.current = false;
       }
@@ -153,21 +174,18 @@ export function useAudio(sendBinary: (data: ArrayBuffer) => void): UseAudioRetur
   }, []);
 
   const handleInterrupt = useCallback(() => {
-    // Stop current playback by resetting the playback context
-    if (playbackContextRef.current) {
-      playbackContextRef.current.close().catch(console.error);
-      const ctx = new AudioContext({ sampleRate: 24000 });
-      ctx.resume().catch(console.error); // Ensure context is active
-      playbackContextRef.current = ctx;
+    // Stop current playback by stopping all active sources
+    activeSourcesRef.current.forEach(source => {
+      try {
+        source.onended = null;
+        source.stop();
+        source.disconnect();
+      } catch (err) { }
+    });
+    activeSourcesRef.current.clear();
 
-      // CRITICAL: Must recreate the analyser node for the new context
-      const analyser = ctx.createAnalyser();
-      analyser.fftSize = 2048;
-      aiAnalyserRef.current = analyser;
-
-      nextPlayTimeRef.current = 0;
-      isPlayingRef.current = false;
-    }
+    nextPlayTimeRef.current = 0;
+    isPlayingRef.current = false;
     console.log('⚡ Playback interrupted');
   }, []);
 

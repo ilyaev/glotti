@@ -158,6 +158,7 @@ export function Transcript({ lines, aiName }: { lines?: string[]; aiName?: strin
 import { ShareModal } from '../ShareModal';
 import { FeedbackModal } from './FeedbackModal';
 import { Play } from 'lucide-react';
+import { initGlobalAudio } from '../../hooks/useAudio';
 
 export function PartnerInsightCard({ sessionId, userId, voiceName }: { sessionId?: string; userId?: string; voiceName?: string }) {
     const [showFeedback, setShowFeedback] = React.useState(false);
@@ -178,7 +179,10 @@ export function PartnerInsightCard({ sessionId, userId, voiceName }: { sessionId
                         </p>
                         <button
                             className="partner-insight__play-btn"
-                            onClick={() => setShowFeedback(true)}
+                            onClick={() => {
+                                initGlobalAudio();
+                                setShowFeedback(true);
+                            }}
                         >
                             <Play size={20} fill="currentColor" />
                             <span>Listen & Discuss</span>
@@ -207,14 +211,11 @@ interface ReportActionsProps {
 }
 
 export function ReportActions({ onRestart, sessionId, userId, isShared, report }: ReportActionsProps) {
-    const [shareUrl, setShareUrl] = React.useState<string | null>(null);
+    const [showShare, setShowShare] = React.useState(false);
 
-    const handleShare = async () => {
+    const handleShare = () => {
         if (!sessionId || !userId) return;
-        const { generateShareKey } = await import('../../utils/shareKey');
-        const key = await generateShareKey(sessionId, userId);
-        const url = `${window.location.origin}${window.location.pathname}#/sessions/${sessionId}/${key}`;
-        setShareUrl(url);
+        setShowShare(true);
     };
 
     return (
@@ -226,12 +227,12 @@ export function ReportActions({ onRestart, sessionId, userId, isShared, report }
                     </button>
                 )}
                 <button className="btn btn--primary" onClick={onRestart}>
-                    {isShared ? 'Try it yourself!' : 'Try Again'}
+                    {isShared ? 'Practice with Glotti' : 'Try Again'}
                 </button>
             </div>
 
-            {shareUrl && (
-                <ShareModal url={shareUrl} onClose={() => setShareUrl(null)} report={report} />
+            {showShare && sessionId && userId && (
+                <ShareModal sessionId={sessionId} userId={userId} onClose={() => setShowShare(false)} report={report} />
             )}
         </>
     );

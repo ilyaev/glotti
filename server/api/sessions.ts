@@ -65,13 +65,23 @@ router.get('/:id', async (req, res) => {
             return;
         }
 
-        // If a share key is provided, verify SHA-256(sessionId + userId)
+        // Compute both possible share keys
+        const expectedBasic = createHash('sha256')
+            .update(session.id + session.userId)
+            .digest('hex')
+            .slice(0, 24);
+
+        const expectedFull = createHash('sha256')
+            .update(session.id + session.userId + 'full_transcript')
+            .digest('hex')
+            .slice(0, 24);
+
+        const isFullTranscript = shareKey === expectedFull;
+        const isBasicShare = shareKey === expectedBasic;
+
+        // If a share key is provided, verify against both possible valid hashes
         if (shareKey) {
-            const expected = createHash('sha256')
-                .update(session.id + session.userId)
-                .digest('hex')
-                .slice(0, 24);
-            if (shareKey !== expected) {
+            if (!isFullTranscript && !isBasicShare) {
                 res.status(403).json({ error: 'Invalid share key' });
                 return;
             }
@@ -85,7 +95,7 @@ router.get('/:id', async (req, res) => {
             return;
         }
 
-        // Sanitize data if accessed via share key (remove full transcript, keep metrics/report)
+        // Sanitize data if accessed via share key (conditionally include transcript)
         const sanitizedSession = shareKey ? {
             id: session.id,
             mode: session.mode,
@@ -93,7 +103,8 @@ router.get('/:id', async (req, res) => {
             report: session.report,
             metrics: session.metrics,
             voiceName: session.voiceName,
-            // Do NOT include user ID or full transcript in shared views
+            ...(isFullTranscript ? { transcript: session.transcript } : {}),
+            // Do NOT include user ID in shared views
         } : {
             ...session,
             startedAt: session.startedAt instanceof Date ? session.startedAt.toISOString() : session.startedAt,
@@ -117,12 +128,17 @@ router.get('/shared/og/:id/:key', async (req, res) => {
             return;
         }
 
-        const expected = createHash('sha256')
+        const expectedBasic = createHash('sha256')
             .update(session.id + session.userId)
             .digest('hex')
             .slice(0, 24);
 
-        if (key !== expected) {
+        const expectedFull = createHash('sha256')
+            .update(session.id + session.userId + 'full_transcript')
+            .digest('hex')
+            .slice(0, 24);
+
+        if (key !== expectedBasic && key !== expectedFull) {
             res.status(403).send('Forbidden');
             return;
         }
@@ -134,11 +150,12 @@ router.get('/shared/og/:id/:key', async (req, res) => {
 
         // Return a basic HTML page with OG tags.
         // In the future this could point to a real image URL
-        const html = `
-<!DOCTYPE html>
-<html>
+        const html = `<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns#">
 <head>
+    <meta charset="utf-8">
     <title>Glotti Report: ${modeLabel} - ${score}/10</title>
+    <meta name="author" content="Glotti AI">
     <meta property="og:title" content="Glotti Report: ${modeLabel} - ${score}/10" />
     <meta property="og:description" content="I just completed an AI-powered coaching session. See how I performed!" />
     <meta property="og:type" content="website" />
@@ -150,11 +167,14 @@ router.get('/shared/og/:id/:key', async (req, res) => {
     <meta name="twitter:title" content="Glotti Report: ${modeLabel} - ${score}/10" />
     <meta name="twitter:description" content="I just completed an AI-powered coaching session. See how I performed!" />
     <meta name="twitter:image" content="${req.protocol}://${req.get('host')}/api/sessions/shared/og-image/${id}/${key}" />
-    <!-- Redirect to the actual app -->
-    <meta http-equiv="refresh" content="0; url=${baseUrl}/#/sessions/${id}/${key}" />
+    <!-- Redirect to the actual app using JS to prevent scrapers from following a meta refresh -->
+    <script>
+        window.location.replace("${baseUrl}/#/sessions/${id}/${key}");
+    </script>
 </head>
-<body>
+<body style="font-family: sans-serif; padding: 2rem; text-align: center;">
     <p>Redirecting to report...</p>
+    <p>If you are not redirected automatically, <a href="${baseUrl}/#/sessions/${id}/${key}">click here</a>.</p>
 </body>
 </html>`;
 
@@ -179,8 +199,9 @@ router.get('/shared/og-image/:id/:key', async (req, res) => {
             return;
         }
 
-        const expected = createHash('sha256').update(session.id + session.userId).digest('hex').slice(0, 24);
-        if (key !== expected) {
+        const expectedBasic = createHash('sha256').update(session.id + session.userId).digest('hex').slice(0, 24);
+        const expectedFull = createHash('sha256').update(session.id + session.userId + 'full_transcript').digest('hex').slice(0, 24);
+        if (key !== expectedBasic && key !== expectedFull) {
             res.status(403).send('Forbidden');
             return;
         }

@@ -41,18 +41,26 @@ export function SessionDetail({ sessionId, userId, shareKey, onRestart }: Props)
 
     return (
         <div className="session-detail">
-            {!shareKey && (
-                <div className="session-detail__nav">
-                    <button className="sessions-back-btn" onClick={() => navigateTo('sessions')}>
-                        ← All Sessions
+            <div className={`session-detail__nav ${shareKey ? 'session-detail__nav--shared' : ''}`}>
+                <div className="session-detail__nav-inner">
+                    <button
+                        className={`sessions-logo ${shareKey ? 'sessions-logo--shared' : ''}`}
+                        onClick={() => { window.location.hash = ''; }}
+                    >
+                        <img className="logo-img--small" src="/glotti_logo.png" alt="Glotti" />
                     </button>
-                    {session && (
+                    {!shareKey && (
+                        <button className="sessions-back-btn" onClick={() => navigateTo('sessions')}>
+                            ← All Sessions
+                        </button>
+                    )}
+                    {session && !shareKey && (
                         <span className="session-detail__nav-meta">
                             {formatDateTime(session.startedAt)}
                         </span>
                     )}
                 </div>
-            )}
+            </div>
 
             {loading && (
                 <div className="sessions-page__state">

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useAudio } from '../../hooks/useAudio';
 import { Waveform } from '../Waveform';
 import { X, Mic, MicOff, MessageSquareText } from 'lucide-react';
+import type { TranscriptCue } from '../../types';
 
 interface Props {
     sessionId: string;
@@ -17,6 +18,13 @@ export function FeedbackModal({ sessionId, userId, onClose }: Props) {
     const [status, setStatus] = useState<'connecting' | 'listening' | 'speaking' | 'interrupted' | 'ending' | 'disconnected'>('connecting');
     const wsRef = useRef<WebSocket | null>(null);
     const [elapsed, setElapsed] = useState(0);
+    const [cues, setCues] = useState<TranscriptCue[]>([]);
+    const feedEndRef = useRef<HTMLDivElement | null>(null);
+
+    // Auto-scroll coaching feed when new cues arrive
+    useEffect(() => {
+        feedEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [cues]);
 
     // Custom connect for the feedback mode that uses the specialized URL
     const connectFeedback = () => {
@@ -76,7 +84,7 @@ export function FeedbackModal({ sessionId, userId, onClose }: Props) {
                         setTimeout(() => setStatus('listening'), 1000);
                         break;
                     case 'transcript_cue':
-                        // Log transcript but don't store if not used in UI
+                        setCues(prev => [...prev, { text: msg.text, timestamp: msg.timestamp }]);
                         console.log('📝 [Feedback] Cue:', msg.text);
                         break;
                     case 'turn_complete':
@@ -134,6 +142,32 @@ export function FeedbackModal({ sessionId, userId, onClose }: Props) {
                     />
                 </div>
 
+                {/* Live transcript feed */}
+                <div className="transcript-feed">
+                    <h3 className="transcript-feed__title">
+                        <span className="transcript-feed__live-dot" />
+                        Live Transcript
+                    </h3>
+                    <div className="transcript-feed__list">
+                        {cues.length === 0 ? (
+                            <div className="transcript-feed__empty">
+                                Waiting for conversation...
+                            </div>
+                        ) : (
+                            cues.map((cue, i) => (
+                                <div
+                                    key={i}
+                                    className={`transcript-feed__item ${i === cues.length - 1 ? 'transcript-feed__item--latest' : ''}`}
+                                >
+                                    <span className="transcript-feed__time">{formatTime(cue.timestamp)}</span>
+                                    <span className="transcript-feed__text">{cue.text}</span>
+                                </div>
+                            ))
+                        )}
+                        <div ref={feedEndRef} />
+                    </div>
+                </div>
+
                 <div className="feedback-modal__footer">
                     <div className="feedback-modal__timer">
                         <span className={`timer-dot ${elapsed > 50 ? 'timer-dot--danger' : ''}`}></span>
@@ -146,4 +180,10 @@ export function FeedbackModal({ sessionId, userId, onClose }: Props) {
             </div>
         </div>
     );
+}
+
+function formatTime(seconds: number): string {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }

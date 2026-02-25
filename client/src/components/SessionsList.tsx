@@ -63,13 +63,18 @@ export function SessionsList({ userId }: Props) {
         <div className="sessions-page">
             {/* Header */}
             <div className="sessions-page__header">
-                <button className="sessions-back-btn" onClick={() => { window.location.hash = ''; }}>
-                    ← Back
-                </button>
-                <h1 className="sessions-page__title">Past Sessions</h1>
-                <span className="sessions-page__count">
-                    {!loading && !error ? `${sessions.length} session${sessions.length !== 1 ? 's' : ''}` : ''}
-                </span>
+                <div className="sessions-page__header-inner">
+                    <button className="sessions-logo" onClick={() => { window.location.hash = ''; }}>
+                        <img className="logo-img--small" src="/glotti_logo.png" alt="Glotti" />
+                    </button>
+                    <button className="sessions-back-btn" onClick={() => { window.location.hash = ''; }}>
+                        ← Back
+                    </button>
+                    <h1 className="sessions-page__title">Past Sessions</h1>
+                    <span className="sessions-page__count">
+                        {!loading && !error ? `${sessions.length} session${sessions.length !== 1 ? 's' : ''}` : ''}
+                    </span>
+                </div>
             </div>
 
             {/* States */}

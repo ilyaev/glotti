@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Mode } from '../App';
 import { navigateTo } from '../App';
 import { Target, Handshake, Swords, Zap, ArrowRight } from 'lucide-react';
+import { initGlobalAudio } from '../hooks/useAudio';
 
 interface Props {
     onStart: (mode: Mode) => void;
@@ -68,7 +69,7 @@ export function ModeSelect({ onStart, userId }: Props) {
     return (
         <div className="mode-select">
             <div className="mode-select__header">
-                <h1 className="logo-text">Glotti</h1>
+                <img className="logo-img" src="/glotti_logo.png" alt="Glotti" />
                 <p className="tagline">Master high-stakes conversations with real-time AI sparring.</p>
 
                 <div className="how-it-works">
@@ -91,7 +92,10 @@ export function ModeSelect({ onStart, userId }: Props) {
                     <button
                         key={m.id}
                         className="mode-card"
-                        onClick={() => onStart(m.id)}
+                        onClick={() => {
+                            initGlobalAudio();
+                            onStart(m.id);
+                        }}
                         style={{ '--card-accent': m.color } as React.CSSProperties}
                     >
                         <span className="mode-card__icon">
