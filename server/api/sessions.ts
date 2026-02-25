@@ -142,10 +142,14 @@ router.get('/shared/og/:id/:key', async (req, res) => {
     <meta property="og:title" content="Glotti Report: ${modeLabel} - ${score}/10" />
     <meta property="og:description" content="I just completed an AI-powered coaching session. See how I performed!" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="${baseUrl}/#/sessions/${id}/${key}" />
+    <meta property="og:url" content="${baseUrl}/sessiong/${id}/${key}" />
     <meta property="og:image" content="${req.protocol}://${req.get('host')}/api/sessions/shared/og-image/${id}/${key}" />
     <meta property="og:image:width" content="1080" />
     <meta property="og:image:height" content="1080" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Glotti Report: ${modeLabel} - ${score}/10" />
+    <meta name="twitter:description" content="I just completed an AI-powered coaching session. See how I performed!" />
+    <meta name="twitter:image" content="${req.protocol}://${req.get('host')}/api/sessions/shared/og-image/${id}/${key}" />
     <!-- Redirect to the actual app -->
     <meta http-equiv="refresh" content="0; url=${baseUrl}/#/sessions/${id}/${key}" />
 </head>
