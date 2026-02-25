@@ -113,9 +113,11 @@ export const ImpromptuCard = forwardRef<HTMLDivElement, CardProps>(({ report, is
                     marginTop: '30px',
                     marginBottom: '40px',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                 }}>
-                    "{summaryText}"
+                    {`"${summaryText}"`}
                 </div>
 
                 {/* Bottom Row White Metric Cards */}
@@ -133,9 +135,9 @@ export const ImpromptuCard = forwardRef<HTMLDivElement, CardProps>(({ report, is
                             <Users size={32} strokeWidth={2.5} />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', fontSize: '28px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            <span>Filler</span>
+                            <span style={{ display: 'flex' }}>Filler</span>
                         </div>
-                        <div style={{ fontSize: '48px', fontWeight: '800', color: '#ea580c', lineHeight: 1 }}>{formatMetricValue('total_filler_words', metricsMap['total_filler_words'])}</div>
+                        <div style={{ display: 'flex', fontSize: '48px', fontWeight: '800', color: '#ea580c', lineHeight: 1 }}>{formatMetricValue('total_filler_words', metricsMap['total_filler_words'])}</div>
                     </div>
 
                     {/* Metric 2 */}
@@ -150,9 +152,9 @@ export const ImpromptuCard = forwardRef<HTMLDivElement, CardProps>(({ report, is
                             <Clock size={32} strokeWidth={2.5} />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', fontSize: '28px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            <span>Pacing</span>
+                            <span style={{ display: 'flex' }}>Pacing</span>
                         </div>
-                        <div style={{ fontSize: '48px', fontWeight: '800', color: '#ea580c', lineHeight: 1 }}>{formatMetricValue('avg_words_per_minute', metricsMap['avg_words_per_minute'])}</div>
+                        <div style={{ display: 'flex', fontSize: '48px', fontWeight: '800', color: '#ea580c', lineHeight: 1 }}>{formatMetricValue('avg_words_per_minute', metricsMap['avg_words_per_minute'])}</div>
                     </div>
 
                     {/* Metric 3: Scenario Specific */}
@@ -167,9 +169,9 @@ export const ImpromptuCard = forwardRef<HTMLDivElement, CardProps>(({ report, is
                             <Zap size={32} strokeWidth={2.5} />
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', fontSize: '28px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            <span>Topic</span>
+                            <span style={{ display: 'flex' }}>Topic</span>
                         </div>
-                        <div style={{ fontSize: '20px', fontWeight: '800', color: '#ea580c', lineHeight: 1.2, textAlign: 'center', paddingTop: '8px' }}>{impromptuExtra?.assigned_topic || 'N/A'}</div>
+                        <div style={{ display: 'flex', fontSize: '20px', fontWeight: '800', color: '#ea580c', lineHeight: 1.2, textAlign: 'center', paddingTop: '8px' }}>{impromptuExtra?.assigned_topic || 'N/A'}</div>
                     </div>
 
                 </div>

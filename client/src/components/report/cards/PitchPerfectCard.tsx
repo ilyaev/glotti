@@ -79,10 +79,12 @@ export const PitchPerfectCard = forwardRef<HTMLDivElement, CardProps>(({ report,
                     marginBottom: '40px',
                     fontWeight: 500,
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                     // maxWidth: '90%'
                 }}>
-                    "{summaryText}"
+                    {`"${summaryText}"`}
                 </div>
 
                 {/* Lower Layout - Gauge (Left) & Metrics (Right) */}
@@ -111,8 +113,8 @@ export const PitchPerfectCard = forwardRef<HTMLDivElement, CardProps>(({ report,
                         </svg>
                         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '4%' }}>
                             <div style={{ display: 'flex', alignItems: 'baseline', color: '#0f172a' }}>
-                                <span style={{ fontSize: '140px', fontWeight: '800', letterSpacing: '-0.03em' }}>{overall_score}</span>
-                                <span style={{ fontSize: '80px', fill: '#64748b', color: '#64748b', fontWeight: 600, marginLeft: '8px' }}>/10</span>
+                                <div style={{ display: 'flex', fontSize: '140px', fontWeight: '800', letterSpacing: '-0.03em' }}>{overall_score}</div>
+                                <div style={{ display: 'flex', fontSize: '80px', fill: '#64748b', color: '#64748b', fontWeight: 600, marginLeft: '8px' }}>/10</div>
                             </div>
                         </div>
                     </div>
@@ -126,7 +128,7 @@ export const PitchPerfectCard = forwardRef<HTMLDivElement, CardProps>(({ report,
                                 <Users size={36} strokeWidth={2.5} />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <div style={{ fontSize: '32px', color: '#64748b', fontWeight: 600, letterSpacing: '0.02em' }}>Filler Words</div>
+                                <div style={{ display: 'flex', fontSize: '32px', color: '#64748b', fontWeight: 600, letterSpacing: '0.02em' }}>Filler Words</div>
                                 <div style={{ display: 'flex', fontSize: '48px', fontWeight: '800', color: '#0f172a', lineHeight: 1 }}>{formatMetricValue('total_filler_words', metricsMap['total_filler_words'])}</div>
                             </div>
                         </div>
@@ -137,7 +139,7 @@ export const PitchPerfectCard = forwardRef<HTMLDivElement, CardProps>(({ report,
                                 <Clock size={36} strokeWidth={2.5} />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <div style={{ fontSize: '32px', color: '#64748b', fontWeight: 600, letterSpacing: '0.02em' }}>WPM</div>
+                                <div style={{ display: 'flex', fontSize: '32px', color: '#64748b', fontWeight: 600, letterSpacing: '0.02em' }}>WPM</div>
                                 <div style={{ display: 'flex', fontSize: '48px', fontWeight: '800', color: '#0f172a', lineHeight: 1 }}>{formatMetricValue('avg_words_per_minute', metricsMap['avg_words_per_minute'])}</div>
                             </div>
                         </div>
@@ -148,10 +150,10 @@ export const PitchPerfectCard = forwardRef<HTMLDivElement, CardProps>(({ report,
                                 <FileText size={36} strokeWidth={2.5} />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <div style={{ fontSize: '32px', color: '#64748b', fontWeight: 600, letterSpacing: '0.02em' }}>Structure Score</div>
+                                <div style={{ display: 'flex', fontSize: '32px', color: '#64748b', fontWeight: 600, letterSpacing: '0.02em' }}>Structure Score</div>
                                 <div style={{ display: 'flex', alignItems: 'baseline', fontSize: '48px', fontWeight: '800', color: '#0f172a', lineHeight: 1 }}>
-                                    {pitchExtra?.pitch_structure_score || 'N/A'}
-                                    <span style={{ fontSize: '30px', color: '#64748b', marginLeft: '8px' }}>/10</span>
+                                    <div style={{ display: 'flex' }}>{pitchExtra?.pitch_structure_score || 'N/A'}</div>
+                                    <div style={{ display: 'flex', fontSize: '30px', color: '#64748b', marginLeft: '8px' }}>/10</div>
                                 </div>
                             </div>
                         </div>

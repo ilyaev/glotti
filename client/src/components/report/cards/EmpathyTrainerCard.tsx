@@ -83,9 +83,11 @@ export const EmpathyTrainerCard = forwardRef<HTMLDivElement, CardProps>(({ repor
                 // boxShadow: isOgImage ? undefined : '0 10px 25px -5px rgba(139, 92, 246, 0.4)',
                 marginBottom: '80px',
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
             }}>
-                "{summaryText}"
+                {`"${summaryText}"`}
             </div>
 
 
@@ -98,10 +100,10 @@ export const EmpathyTrainerCard = forwardRef<HTMLDivElement, CardProps>(({ repor
                     <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#d8b4fe', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#581c87' }}>
                         <MessageCircle size={40} strokeWidth={2} />
                     </div>
-                    <div style={{ fontSize: '30px', color: '#6b21a8', fontWeight: 600, letterSpacing: '0.02em', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', fontSize: '30px', color: '#6b21a8', fontWeight: 600, letterSpacing: '0.02em', marginBottom: '12px' }}>
                         {METRIC_LABELS['avg_talk_ratio'] || 'Talk Ratio'}
                     </div>
-                    <div style={{ fontSize: '56px', fontWeight: '800', color: '#4c1d95', lineHeight: 1 }}>{formatMetricValue('avg_talk_ratio', metricsMap['avg_talk_ratio'])}</div>
+                    <div style={{ display: 'flex', fontSize: '56px', fontWeight: '800', color: '#4c1d95', lineHeight: 1 }}>{formatMetricValue('avg_talk_ratio', metricsMap['avg_talk_ratio'])}</div>
                 </div>
 
                 {/* Metric 2 */}
@@ -109,10 +111,10 @@ export const EmpathyTrainerCard = forwardRef<HTMLDivElement, CardProps>(({ repor
                     <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#d8b4fe', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#581c87' }}>
                         <Smile size={40} strokeWidth={2} />
                     </div>
-                    <div style={{ fontSize: '30px', color: '#6b21a8', fontWeight: 600, letterSpacing: '0.02em', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', fontSize: '30px', color: '#6b21a8', fontWeight: 600, letterSpacing: '0.02em', marginBottom: '12px' }}>
                         Dominant Tone
                     </div>
-                    <div style={{ fontSize: '56px', fontWeight: '800', color: '#4c1d95', lineHeight: 1 }}>{String(metricsMap['dominant_user_tone'] || 'N/A').toLowerCase()}</div>
+                    <div style={{ display: 'flex', fontSize: '56px', fontWeight: '800', color: '#4c1d95', lineHeight: 1 }}>{String(metricsMap['dominant_user_tone'] || 'N/A').toLowerCase()}</div>
                 </div>
 
                 {/* Metric 3: Scenario Specific */}
@@ -120,10 +122,10 @@ export const EmpathyTrainerCard = forwardRef<HTMLDivElement, CardProps>(({ repor
                     <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#d8b4fe', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#581c87' }}>
                         <ShieldAlert size={40} strokeWidth={2} />
                     </div>
-                    <div style={{ fontSize: '30px', color: '#6b21a8', fontWeight: 600, letterSpacing: '0.02em', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', fontSize: '30px', color: '#6b21a8', fontWeight: 600, letterSpacing: '0.02em', marginBottom: '12px' }}>
                         Escalation Moments
                     </div>
-                    <div style={{ fontSize: '56px', fontWeight: '800', color: '#4c1d95', lineHeight: 1 }}>{empathyExtra?.escalation_moments?.length || 0}</div>
+                    <div style={{ display: 'flex', fontSize: '56px', fontWeight: '800', color: '#4c1d95', lineHeight: 1 }}>{empathyExtra?.escalation_moments?.length || 0}</div>
                 </div>
 
             </div>

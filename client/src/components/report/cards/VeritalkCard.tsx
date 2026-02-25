@@ -110,9 +110,11 @@ export const VeritalkCard = forwardRef<HTMLDivElement, CardProps>(({ report, isO
                     marginTop: '20px',
                     marginBottom: '40px',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                 }}>
-                    "{summaryText}"
+                    {`"${summaryText}"`}
                 </div>
 
                 {/* Bottom Row Metrics with Gold Borders */}
@@ -126,10 +128,10 @@ export const VeritalkCard = forwardRef<HTMLDivElement, CardProps>(({ report, isO
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px'
                     }}>
                         <div style={{ display: 'flex', flexDirection: 'column', fontSize: '28px', color: '#d1d5db', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
-                            <span>AVG</span>
-                            <span>WPM</span>
+                            <div style={{ display: 'flex' }}>AVG</div>
+                            <div style={{ display: 'flex' }}>WPM</div>
                         </div>
-                        <div style={{ fontSize: '56px', fontWeight: '800', color: '#fbbf24', lineHeight: 1 }}>{formatMetricValue('avg_words_per_minute', metricsMap['avg_words_per_minute'])}</div>
+                        <div style={{ display: 'flex', fontSize: '56px', fontWeight: '800', color: '#fbbf24', lineHeight: 1 }}>{formatMetricValue('avg_words_per_minute', metricsMap['avg_words_per_minute'])}</div>
                     </div>
 
                     {/* Metric 2 */}
@@ -140,9 +142,9 @@ export const VeritalkCard = forwardRef<HTMLDivElement, CardProps>(({ report, isO
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px'
                     }}>
                         <div style={{ display: 'flex', flexDirection: 'column', fontSize: '28px', color: '#d1d5db', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
-                            <span>{METRIC_LABELS['total_filler_words']}</span>
+                            <div style={{ display: 'flex' }}>{METRIC_LABELS['total_filler_words']}</div>
                         </div>
-                        <div style={{ fontSize: '56px', fontWeight: '800', color: '#fbbf24', lineHeight: 1 }}>{formatMetricValue('total_filler_words', metricsMap['total_filler_words'])}</div>
+                        <div style={{ display: 'flex', fontSize: '56px', fontWeight: '800', color: '#fbbf24', lineHeight: 1 }}>{formatMetricValue('total_filler_words', metricsMap['total_filler_words'])}</div>
                     </div>
 
                     {/* Metric 3: Scenario Specific */}
@@ -152,10 +154,10 @@ export const VeritalkCard = forwardRef<HTMLDivElement, CardProps>(({ report, isO
                         border: '2px solid #fbbf24',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px'
                     }}>
-                        <div style={{ fontSize: '28px', color: '#d1d5db', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
+                        <div style={{ display: 'flex', fontSize: '28px', color: '#d1d5db', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>
                             Fallacies Detected
                         </div>
-                        <div style={{ fontSize: '56px', fontWeight: '800', color: '#fbbf24', lineHeight: 1 }}>{veritalkExtra?.fallacies_detected?.length || 0}</div>
+                        <div style={{ display: 'flex', fontSize: '56px', fontWeight: '800', color: '#fbbf24', lineHeight: 1 }}>{veritalkExtra?.fallacies_detected?.length || 0}</div>
                     </div>
 
                 </div>
