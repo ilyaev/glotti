@@ -28,6 +28,9 @@ RUN npm ci --production
 COPY --from=builder /app/dist/ ./dist/
 # Copy prompts
 COPY --from=builder /app/server/agents/prompts/ ./server/agents/prompts/
+# Copy Satori SSR Assets (Fonts & Backgrounds)
+COPY --from=builder /app/server/assets/ ./server/assets/
+COPY --from=builder /app/client/public/cards/ ./client/public/cards/
 
 ENV NODE_ENV=production
 ENV PORT=8080

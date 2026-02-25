@@ -7,6 +7,7 @@ import { Resvg } from '@resvg/resvg-js';
 import { PerformanceCard } from '../../client/src/components/report/PerformanceCard.js';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { config } from '../config.js';
 
 const router = Router();
 const store = createStore();
@@ -129,6 +130,8 @@ router.get('/shared/og/:id/:key', async (req, res) => {
         const score = session.report.overall_score;
         const modeLabel = session.mode.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
 
+        const baseUrl = config.isDev ? `http://${req.get('host')}` : 'https://glotti.pbartz.net';
+
         // Return a basic HTML page with OG tags.
         // In the future this could point to a real image URL
         const html = `
@@ -139,12 +142,12 @@ router.get('/shared/og/:id/:key', async (req, res) => {
     <meta property="og:title" content="Glotti Report: ${modeLabel} - ${score}/10" />
     <meta property="og:description" content="I just completed an AI-powered coaching session. See how I performed!" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://glotti.app/sessions/${id}/${key}" />
-    <meta property="og:image" content="${req.protocol}://${req.get('host')}/api/shared/og-image/${id}/${key}" />
+    <meta property="og:url" content="${baseUrl}/#/sessions/${id}/${key}" />
+    <meta property="og:image" content="${req.protocol}://${req.get('host')}/api/sessions/shared/og-image/${id}/${key}" />
     <meta property="og:image:width" content="1080" />
     <meta property="og:image:height" content="1080" />
     <!-- Redirect to the actual app -->
-    <meta http-equiv="refresh" content="0; url=/#/sessions/${id}/${key}" />
+    <meta http-equiv="refresh" content="0; url=${baseUrl}/#/sessions/${id}/${key}" />
 </head>
 <body>
     <p>Redirecting to report...</p>

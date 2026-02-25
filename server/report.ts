@@ -189,9 +189,9 @@ ${categorySchemaBlock}
   "improvement_tips": ["<tip 1>", "<tip 2>", "<tip 3>"],
   "social_share_texts": {
     "performance_card_summary": "<A punchy, 1-2 sentence, encouraging quote or summary from the AI partner evaluating the user's performance. Suitable for highlighting on a visual score card.>",
-    "linkedin_template": "<A professional 1-2 paragraph post about completing this AI training session, featuring the user's score/highlights, and asking an engaging question. Include a couple professional hashtags.>",
-    "twitter_template": "<A short, witty 280-character maximum tweet about surviving/acing the AI session. Include emojis and #GlottiApp #AI.>",
-    "facebook_template": "<A conversational post sharing the experience of practicing with an AI coach, focusing on the human element of improvement.>"
+    "linkedin_template": "<A professional 1-2 paragraph post about completing this AI training session, featuring the user's score/highlights, and asking an engaging question. Include a couple professional hashtags. MUST NOT include any emojis. Return ONLY the exact text to be pasted, with no quotes or introductory phrases.>",
+    "twitter_template": "<A short, witty tweet about surviving/acing the AI session. Include #GlottiApp #AI. MUST NOT include any emojis. Return ONLY the exact text to be pasted, with no quotes or introductory phrases.>",
+    "facebook_template": "<A conversational post sharing the experience of practicing with an AI coach, focusing on the human element of improvement. MUST NOT include any emojis. Return ONLY the exact text to be pasted, with no quotes or introductory phrases.>"
   }${extraBlock}
 }
 

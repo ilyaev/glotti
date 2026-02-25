@@ -35,7 +35,12 @@ export function ShareModal({ url, onClose, report }: Props) {
     const serverImageUrl = sessionId && sessionKey ? `${apiOrigin}/api/sessions/shared/og-image/${sessionId}/${sessionKey}` : null;
 
     // Construct the actual redirect gateway URL that users should visit
-    const shareGatewayUrl = sessionId && sessionKey ? `${apiOrigin}/api/sessions/shared/og/${sessionId}/${sessionKey}` : url;
+    const isLocalhost = window.location.hostname === 'localhost';
+    const shareGatewayUrl = sessionId && sessionKey
+        ? (isLocalhost
+            ? `${apiOrigin}/api/sessions/shared/og/${sessionId}/${sessionKey}`
+            : `${window.location.origin}/sessiong/${sessionId}/${sessionKey}`)
+        : url;
 
     const canNativeShare = Boolean(navigator.share);
 
