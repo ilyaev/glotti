@@ -16,9 +16,10 @@ export function ShareModal({ url, onClose, report }: Props) {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const cardRef = useRef<HTMLDivElement>(null);
 
-    const shareText = report
-        ? `Just completed a "${report.mode.replace('_', ' ')}" coaching session on Glotti! Scored ${report.overall_score}/10.`
-        : "Check out this AI coaching session on Glotti.";
+    const fallbackShareText = `I just scored ${report?.overall_score}/10 on a Glotti ${report?.mode.replace('_', ' ')} session! Check out my performance: \n\n${url}`;
+    const twitterText = report?.social_share_texts?.twitter_template ? `${report.social_share_texts.twitter_template} \n\n${url}` : fallbackShareText;
+    const linkedinText = report?.social_share_texts?.linkedin_template ? `${report.social_share_texts.linkedin_template} \n\n${url}` : fallbackShareText;
+    const facebookText = report?.social_share_texts?.facebook_template ? `${report.social_share_texts.facebook_template} \n\n${url}` : fallbackShareText;
 
     const canNativeShare = Boolean(navigator.share);
 
@@ -33,7 +34,7 @@ export function ShareModal({ url, onClose, report }: Props) {
         try {
             await navigator.share({
                 title: 'Glotti Report',
-                text: shareText,
+                text: fallbackShareText,
                 url: url
             });
         } catch (err) {
@@ -143,7 +144,7 @@ export function ShareModal({ url, onClose, report }: Props) {
                     <button
                         className="btn btn--icon"
                         title="Share on Twitter"
-                        onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, '_blank')}
+                        onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(twitterText)}`, '_blank')}
                         style={{ width: '48px', height: '48px', padding: 0, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}
                     >
                         <Twitter size={20} />
@@ -151,7 +152,7 @@ export function ShareModal({ url, onClose, report }: Props) {
                     <button
                         className="btn btn--icon"
                         title="Share on LinkedIn"
-                        onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank')}
+                        onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&summary=${encodeURIComponent(linkedinText)}`, '_blank')}
                         style={{ width: '48px', height: '48px', padding: 0, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}
                     >
                         <Linkedin size={20} />
@@ -159,7 +160,7 @@ export function ShareModal({ url, onClose, report }: Props) {
                     <button
                         className="btn btn--icon"
                         title="Share on Facebook"
-                        onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank')}
+                        onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(facebookText)}`, '_blank')}
                         style={{ width: '48px', height: '48px', padding: 0, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}
                     >
                         <Facebook size={20} />

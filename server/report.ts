@@ -39,6 +39,12 @@ const BaseReportSchema = z.object({
   metrics: MetricsSchema,
   key_moments: z.array(KeyMomentSchema),
   improvement_tips: z.array(z.string()),
+  social_share_texts: z.object({
+    performance_card_summary: z.string(),
+    linkedin_template: z.string(),
+    twitter_template: z.string(),
+    facebook_template: z.string(),
+  }),
 });
 
 // Extra field schemas per scenario
@@ -180,7 +186,13 @@ ${categorySchemaBlock}
   "key_moments": [
     {"timestamp": "<mm:ss>", "type": "strength"|"weakness", "note": "<description of USER's moment, referencing the dialogue>"}
   ],
-  "improvement_tips": ["<tip 1>", "<tip 2>", "<tip 3>"]${extraBlock}
+  "improvement_tips": ["<tip 1>", "<tip 2>", "<tip 3>"],
+  "social_share_texts": {
+    "performance_card_summary": "<A punchy, 1-2 sentence, encouraging quote or summary from the AI partner evaluating the user's performance. Suitable for highlighting on a visual score card.>",
+    "linkedin_template": "<A professional 1-2 paragraph post about completing this AI training session, featuring the user's score/highlights, and asking an engaging question. Include a couple professional hashtags.>",
+    "twitter_template": "<A short, witty 280-character maximum tweet about surviving/acing the AI session. Include emojis and #GlottiApp #AI.>",
+    "facebook_template": "<A conversational post sharing the experience of practicing with an AI coach, focusing on the human element of improvement.>"
+  }${extraBlock}
 }
 
 Return ONLY the JSON object, no markdown fences or explanation.
@@ -272,6 +284,12 @@ export async function generateReport(
       },
       key_moments: [],
       improvement_tips: ['Unable to generate report. Please try again.'],
+      social_share_texts: {
+        performance_card_summary: 'Keep practicing to get your personalized summary!',
+        linkedin_template: 'I just completed a training session with Glotti! Check out my performance report. 🚀',
+        twitter_template: 'Just finished a session with @GlottiApp! Check out how I did. 📈 #Glotti #AI',
+        facebook_template: 'Practicing my skills with an AI coach on Glotti. Check out my latest session report!'
+      },
       displayMetrics: reportConfig.displayMetrics,
       voiceName,
     };

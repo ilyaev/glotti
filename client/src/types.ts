@@ -24,6 +24,12 @@ export interface SessionReport {
   };
   key_moments: Array<{ timestamp: string; type: 'strength' | 'weakness'; note: string }>;
   improvement_tips: string[];
+  social_share_texts?: {
+    performance_card_summary: string;
+    linkedin_template: string;
+    twitter_template: string;
+    facebook_template: string;
+  };
   /** Scenario-specific extra data */
   extra?: Record<string, unknown>;
   /** Which metric keys from `metrics` are relevant for this mode */

@@ -3,6 +3,7 @@ import { ModeSelect } from './components/ModeSelect';
 import { Session } from './components/Session';
 import { SessionsList } from './components/SessionsList';
 import { SessionDetail } from './components/SessionDetail';
+import { CardsSandbox } from './components/CardsSandbox';
 import type { SessionReport } from './types';
 
 export type Mode = 'pitch_perfect' | 'empathy_trainer' | 'veritalk' | 'impromptu';
@@ -13,11 +14,13 @@ export type Route =
     | { name: 'home' }
     | { name: 'session'; mode: Mode }
     | { name: 'sessions' }
-    | { name: 'session-detail'; id: string; shareKey?: string };
+    | { name: 'session-detail'; id: string; shareKey?: string }
+    | { name: 'cards-sandbox' };
 
 function parseHash(): Route {
     const hash = window.location.hash.replace(/^#\/?/, '');
     if (hash === 'sessions') return { name: 'sessions' };
+    if (hash === 'cards_sandbox') return { name: 'cards-sandbox' };
     // Match #/sessions/:id/:key  (shareable)  or  #/sessions/:id  (owner)
     const shareMatch = hash.match(/^sessions\/([^/]+)\/([^/]+)$/);
     if (shareMatch) return { name: 'session-detail', id: shareMatch[1], shareKey: shareMatch[2] };
@@ -80,6 +83,7 @@ export default function App() {
                     onRestart={handleRestart}
                 />
             )}
+            {route.name === 'cards-sandbox' && <CardsSandbox />}
         </div>
     );
 }
