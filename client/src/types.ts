@@ -78,6 +78,8 @@ export interface SessionSummary {
   startedAt: string; // ISO string
   duration_seconds: number;
   overall_score: number;
+  voiceName?: string;
+  preview_text?: string;
 }
 
 export interface SessionFull {

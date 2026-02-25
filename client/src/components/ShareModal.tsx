@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download, Share2, Linkedin, Facebook } from 'lucide-react';
+import { Download, Share2, Linkedin, Facebook, X } from 'lucide-react';
 import type { SessionReport } from '../types';
 
 interface Props {
@@ -124,11 +124,12 @@ export function ShareModal({ sessionId, userId, onClose, report }: Props) {
     // Removed client-side html-to-image effect
 
     return (
-        <div className="share-modal__backdrop" onClick={handleBackdrop} style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="share-modal" style={{ maxHeight: '90vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', padding: '24px', width: '100%', maxWidth: '400px' }}>
-                <button className="share-modal__close" onClick={onClose} aria-label="Close">✕</button>
+        <div className="share-modal__backdrop" onClick={handleBackdrop}>
+            <div className="share-modal">
+                <button className="share-modal__close" onClick={onClose} aria-label="Close">
+                    <X size={24} />
+                </button>
 
-                {/* <div className="share-modal__icon">🔗</div> */}
                 <h2 className="share-modal__title">Share your report</h2>
 
                 <div className="share-modal__toggle-row">
@@ -146,8 +147,8 @@ export function ShareModal({ sessionId, userId, onClose, report }: Props) {
                 <p className="share-modal__subtitle">
                     Anyone with this link can view your session report.
                 </p>
-                {/* Link display */}
-                <div className="share-modal__link-row" style={{ alignSelf: 'stretch' }}>
+
+                <div className="share-modal__link-row">
                     <input
                         className="share-modal__link-input"
                         value={shareGatewayUrl}
@@ -162,24 +163,19 @@ export function ShareModal({ sessionId, userId, onClose, report }: Props) {
                     </button>
                 </div>
 
-                {/* Performance Card Download */}
                 {report && (
-                    <div className="share-modal__card-action" style={{ width: '100%', marginTop: '0px' }}>
+                    <div className="share-modal__card-preview">
                         {serverImageUrl ? (
-                            <div style={{ marginBottom: '16px', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.1)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                                <img src={serverImageUrl} alt="Performance Card Preview" width={400} height={400} style={{ width: '100%', height: 'auto', display: 'block' }} />
-                            </div>
+                            <img src={serverImageUrl} alt="Performance Card Preview" width={400} height={400} />
                         ) : (
-                            <div style={{ marginBottom: '16px', height: '200px', borderRadius: '12px', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
-                                Preview unavailable
+                            <div className="share-modal__preview-placeholder">
+                                {sessionId && !sessionKey ? 'Generating preview...' : 'Preview unavailable'}
                             </div>
                         )}
-
                     </div>
                 )}
 
-                {/* Social sharing buttons */}
-                <div className="share-modal__socials" style={{ display: 'flex', gap: '12px', marginTop: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <div className="share-modal__socials">
                     <button
                         className="btn btn--icon"
                         title="Share on X"
@@ -187,7 +183,6 @@ export function ShareModal({ sessionId, userId, onClose, report }: Props) {
                             const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareGatewayUrl)}&text=${encodeURIComponent(twitterText)}`;
                             openShareWindow(twitterUrl);
                         }}
-                        style={{ width: '48px', height: '48px', padding: 0, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}
                     >
                         <XIcon size={18} />
                     </button>
@@ -198,7 +193,6 @@ export function ShareModal({ sessionId, userId, onClose, report }: Props) {
                             const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareGatewayUrl)}`;
                             openShareWindow(linkedinUrl);
                         }}
-                        style={{ width: '48px', height: '48px', padding: 0, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}
                     >
                         <Linkedin size={20} />
                     </button>
@@ -209,7 +203,6 @@ export function ShareModal({ sessionId, userId, onClose, report }: Props) {
                             const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareGatewayUrl)}`;
                             openShareWindow(facebookUrl);
                         }}
-                        style={{ width: '48px', height: '48px', padding: 0, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}
                     >
                         <Facebook size={20} />
                     </button>
@@ -218,7 +211,6 @@ export function ShareModal({ sessionId, userId, onClose, report }: Props) {
                             className="btn btn--icon"
                             title="Share via device..."
                             onClick={handleNativeShare}
-                            style={{ width: '48px', height: '48px', padding: 0, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}
                         >
                             <Share2 size={20} />
                         </button>
@@ -228,55 +220,43 @@ export function ShareModal({ sessionId, userId, onClose, report }: Props) {
                         title="Download Image"
                         onClick={handleDownloadCard}
                         disabled={isDownloading || !serverImageUrl}
-                        style={{ width: '48px', height: '48px', padding: 0, borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}
                     >
                         <Download size={20} />
                     </button>
                 </div>
 
-                {/* Manual Social Copy Blocks */}
                 {report && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '24px', width: '100%' }}>
-                        {/* LinkedIn Post Text */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <div style={{ fontSize: '13px', fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                LinkedIn Post Text
-                            </div>
-                            <div className="share-modal__link-row" style={{ alignSelf: 'stretch', background: '#f8fafc', borderRadius: '8px', padding: '1px' }}>
+                    <div className="share-modal__social-list">
+                        <div className="share-modal__social-item">
+                            <div className="share-modal__social-header">LinkedIn Post Text</div>
+                            <div className="share-modal__social-box">
                                 <textarea
-                                    className="share-modal__link-input"
+                                    className="share-modal__social-textarea"
                                     value={`${linkedinText}\n\n${shareGatewayUrl}`}
                                     readOnly
                                     onFocus={e => e.target.select()}
-                                    style={{ background: 'transparent', border: 'none', resize: 'vertical', minHeight: '80px', overflowY: 'auto', fontSize: '13px', lineHeight: 1.4 }}
                                 />
                                 <button
-                                    className={`share-modal__copy-btn ${copiedLi ? 'share-modal__copy-btn--copied' : ''}`}
+                                    className={`share-modal__copy-btn share-modal__social-copy ${copiedLi ? 'share-modal__copy-btn--copied' : ''}`}
                                     onClick={() => handleCopySocial(`${linkedinText}\n\n${shareGatewayUrl}`, 'li')}
-                                    style={{ alignSelf: 'flex-start', margin: '4px' }}
                                 >
                                     {copiedLi ? '✓ Copied' : 'Copy'}
                                 </button>
                             </div>
                         </div>
 
-                        {/* Facebook Post Text */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <div style={{ fontSize: '13px', fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                Facebook Post Text
-                            </div>
-                            <div className="share-modal__link-row" style={{ alignSelf: 'stretch', background: '#f8fafc', borderRadius: '8px', padding: '1px' }}>
+                        <div className="share-modal__social-item">
+                            <div className="share-modal__social-header">Facebook Post Text</div>
+                            <div className="share-modal__social-box">
                                 <textarea
-                                    className="share-modal__link-input"
+                                    className="share-modal__social-textarea"
                                     value={`${facebookText}\n\n${shareGatewayUrl}`}
                                     readOnly
                                     onFocus={e => e.target.select()}
-                                    style={{ background: 'transparent', border: 'none', resize: 'vertical', minHeight: '80px', overflowY: 'auto', fontSize: '13px', lineHeight: 1.4 }}
                                 />
                                 <button
-                                    className={`share-modal__copy-btn ${copiedFb ? 'share-modal__copy-btn--copied' : ''}`}
+                                    className={`share-modal__copy-btn share-modal__social-copy ${copiedFb ? 'share-modal__copy-btn--copied' : ''}`}
                                     onClick={() => handleCopySocial(`${facebookText}\n\n${shareGatewayUrl}`, 'fb')}
-                                    style={{ alignSelf: 'flex-start', margin: '4px' }}
                                 >
                                     {copiedFb ? '✓ Copied' : 'Copy'}
                                 </button>
@@ -285,18 +265,9 @@ export function ShareModal({ sessionId, userId, onClose, report }: Props) {
                     </div>
                 )}
 
-                {/* Primary Actions */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '24px', width: '100%' }}>
-
-
-                    <button
-                        className="share-modal__dismiss"
-                        onClick={onClose}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', alignSelf: 'center', padding: '12px 24px', borderRadius: '24px', fontSize: '15px', fontWeight: 600, height: '48px', color: '#64748b', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}
-                    >
-                        Close
-                    </button>
-                </div>
+                <button className="share-modal__dismiss" onClick={onClose}>
+                    Close
+                </button>
             </div>
         </div>
     );
