@@ -1,21 +1,46 @@
 import { forwardRef } from 'react';
 import type { SessionReport, EmpathyTrainerExtra } from '../../../types';
-import { METRIC_LABELS, formatMetricValue } from '../ReportUtils.js';
-import { MessageCircle, Smile, ShieldAlert } from 'lucide-react';
+
+import { Heart, MessageCircle, AlertTriangle } from 'lucide-react';
 
 interface CardProps {
     report: SessionReport;
-    isOgImage?: boolean;
-    ogBackgroundImage?: string;
+    isOgImage?: boolean; // For OpenGraph image generation mode (Satori)
+    ogBackgroundImage?: string; // Background image data URI for Satori
 }
 
 export const EmpathyTrainerCard = forwardRef<HTMLDivElement, CardProps>(({ report, isOgImage, ogBackgroundImage }, ref) => {
-    const { overall_score, metrics, extra, social_share_texts, improvement_tips } = report;
+    // 1. DATA EXTRACTION
+    const { overall_score, metrics, extra, social_share_texts, improvement_tips, categories } = report;
     const metricsMap = metrics as unknown as Record<string, number | string>;
-    const summaryText = social_share_texts?.performance_card_summary || improvement_tips[0];
     const empathyExtra = extra as unknown as EmpathyTrainerExtra;
 
-    // Top right design style from Image 2: Soft purple watercolor vibe, massive score text, rich solid banners
+    // Use specific empathy score if available, otherwise overall
+    const empathyScore = categories?.empathy_connection?.score || overall_score;
+    // Fallback text
+    const summaryText = social_share_texts?.performance_card_summary || improvement_tips?.[0] || "Great session!";
+    
+    // Metrics to display
+    const talkRatio = metricsMap.talk_ratio 
+        ? `${Math.round(Number(metricsMap.talk_ratio) * 100)}%` 
+        : '0%';
+    
+    const triggerCount = empathyExtra?.trigger_moments?.length || 0;
+    const goldenPhraseCount = empathyExtra?.golden_phrases?.length || 0;
+
+    // 2. DESIGN CONSTANTS (Emerald Green Theme)
+    const THEME = {
+        bg: '#ecfdf5', // emerald-50
+        textMain: '#064e3b', // emerald-900
+        textSecondary: '#047857', // emerald-700
+        accent: '#10b981', // emerald-500
+        bannerBg: '#059669', // emerald-600
+        bannerText: '#ffffff',
+        iconBg: '#d1fae5', // emerald-100
+        scoreColor: '#065f46', // emerald-800
+    };
+
+    // 3. RENDER
     return (
         <div
             ref={ref}
@@ -23,19 +48,18 @@ export const EmpathyTrainerCard = forwardRef<HTMLDivElement, CardProps>(({ repor
             style={{
                 width: '1080px',
                 height: '1080px',
-                // Simulating a soft, watercolor-like purple gradient landscape
-                // background: 'radial-gradient(circle at 15% 15%, #f3e8ff 0%, transparent 50%), radial-gradient(circle at 85% 85%, #d8b4fe 0%, transparent 50%), linear-gradient(135deg, #ede9fe 0%, #f5d0fe 100%)',
-                background: isOgImage ? '#ede9fe' : 'url(/cards/bg_empathy.jpg) no-repeat center center',
+                background: isOgImage ? THEME.bg : 'url(/cards/bg_empathy.jpg) no-repeat center center',
+                backgroundColor: THEME.bg,
                 backgroundSize: 'cover',
-                color: '#4c1d95', // Deep purple
+                color: THEME.textMain,
                 fontFamily: 'Inter, system-ui, sans-serif',
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
                 boxSizing: 'border-box',
-                borderRadius: isOgImage ? '40px' : '40px',
+                borderRadius: '40px',
+                overflow: 'hidden',
                 boxShadow: isOgImage ? 'none' : '0 25px 50px -12px rgba(0, 0, 0, 0.05)',
-                overflow: 'hidden'
             }}
         >
             {/* Background Layer for Satori Data URI */}
@@ -43,44 +67,84 @@ export const EmpathyTrainerCard = forwardRef<HTMLDivElement, CardProps>(({ repor
                 <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, display: 'flex' }}>
                     <img
                         src={ogBackgroundImage}
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover'
-                        }}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        alt=""
                     />
                 </div>
             )}
 
-            {/* Top Section */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '100px', flex: 1 }}>
-                <h1 style={{ display: 'flex', fontSize: '48px', fontWeight: '800', lineHeight: 1.1, margin: 0, letterSpacing: '0.05em', color: '#4c1d95' }}>
-                    EMPATHY TRAINER
+            {/* HEADER SECTION */}
+            <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                paddingTop: '100px', 
+                flex: 1 
+            }}>
+                <h1 style={{ 
+                    display: 'flex', 
+                    fontSize: '48px', 
+                    fontWeight: 800, 
+                    lineHeight: 1.1, 
+                    margin: 0, 
+                    letterSpacing: '0.05em', 
+                    color: THEME.textMain,
+                    textTransform: 'uppercase'
+                }}>
+                    Empathy Trainer
                 </h1>
 
-                {/* Massive Score Text (No Gauge) */}
-                <div style={{ marginTop: '60px', display: 'flex', alignItems: 'baseline' }}>
-                    <span style={{ fontSize: '180px', fontWeight: '800', color: '#6b21a8', lineHeight: 0.8, letterSpacing: '-0.04em' }}>
-                        {overall_score}
+                {/* BIG SCORE */}
+                <div style={{ marginTop: '50px', display: 'flex', alignItems: 'baseline' }}>
+                    <span style={{ 
+                        fontSize: '220px', 
+                        fontWeight: 800, 
+                        color: THEME.scoreColor, 
+                        lineHeight: 0.8, 
+                        letterSpacing: '-0.04em' 
+                    }}>
+                        {empathyScore}
                     </span>
-                    <span style={{ fontSize: '64px', fontWeight: '600', color: '#6b21a8', opacity: 0.7 }}>
+                    <span style={{ 
+                        fontSize: '80px', 
+                        fontWeight: 600, 
+                        color: THEME.scoreColor, 
+                        opacity: 0.6,
+                        marginLeft: '10px'
+                    }}>
                         /10
                     </span>
                 </div>
+                <div style={{ fontSize: '32px', fontWeight: 600, color: THEME.textSecondary, marginTop: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Empathy Score
+                </div>
+                
+                {/* BRANDING FOOTER (MOVED UP) */}
+                <div style={{ 
+                    textAlign: 'center', 
+                    fontSize: '24px', 
+                    fontWeight: 600, 
+                    color: THEME.textSecondary, 
+                    opacity: 0.6,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    marginTop: '20px'
+                }}>
+                    Gemili.app
+                </div>
             </div>
 
-            {/* Edge-to-Edge Solid Purple Banner for Quote */}
+            {/* QUOTE BANNER */}
             <div style={{
                 width: '100%',
-                background: '#8b5cf6', // Bright purple
-                padding: '40px 40px',
-                color: '#ffffff',
+                background: THEME.bannerBg,
+                padding: '50px 60px',
+                color: THEME.bannerText,
                 fontSize: '42px',
-                lineHeight: 1.2,
+                lineHeight: 1.3,
                 fontStyle: 'italic',
                 fontWeight: 500,
                 textAlign: 'center',
-                // boxShadow: isOgImage ? undefined : '0 10px 25px -5px rgba(139, 92, 246, 0.4)',
                 marginBottom: '80px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -90,42 +154,82 @@ export const EmpathyTrainerCard = forwardRef<HTMLDivElement, CardProps>(({ repor
                 {`"${summaryText}"`}
             </div>
 
+            {/* METRICS ROW */}
+            <div style={{ 
+                display: 'flex', 
+                width: '100%', 
+                padding: '0 80px 100px 80px', 
+                justifyContent: 'space-between',
+                gap: '40px'
+            }}>
 
-
-            {/* Bottom Row Metrics */}
-            <div style={{ display: 'flex', width: '100%', padding: '0 80px 80px 80px', justifyContent: 'space-between' }}>
-
-                {/* Metric 1 */}
+                {/* Metric 1: Triggers (Avoided or Hit) */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                    <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#d8b4fe', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#581c87' }}>
-                        <MessageCircle size={40} strokeWidth={2} />
+                    <div style={{ 
+                        width: '100px', 
+                        height: '100px', 
+                        borderRadius: '50%', 
+                        background: THEME.iconBg, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        marginBottom: '24px', 
+                        color: THEME.textSecondary 
+                    }}>
+                       <AlertTriangle size={48} strokeWidth={2.5} />
                     </div>
-                    <div style={{ display: 'flex', fontSize: '30px', color: '#6b21a8', fontWeight: 600, letterSpacing: '0.02em', marginBottom: '12px' }}>
-                        {METRIC_LABELS['avg_talk_ratio'] || 'Talk Ratio'}
+                    <div style={{ fontSize: '56px', fontWeight: 800, color: THEME.textMain, lineHeight: 1 }}>
+                        {triggerCount}
                     </div>
-                    <div style={{ display: 'flex', fontSize: '56px', fontWeight: '800', color: '#4c1d95', lineHeight: 1 }}>{formatMetricValue('avg_talk_ratio', metricsMap['avg_talk_ratio'])}</div>
+                    <div style={{ fontSize: '24px', fontWeight: 600, color: THEME.textSecondary, marginTop: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Triggers Hit
+                    </div>
                 </div>
 
-                {/* Metric 2 */}
+                {/* Metric 2: Talk Ratio */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                    <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#d8b4fe', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#581c87' }}>
-                        <Smile size={40} strokeWidth={2} />
+                    <div style={{ 
+                        width: '100px', 
+                        height: '100px', 
+                        borderRadius: '50%', 
+                        background: THEME.iconBg, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        marginBottom: '24px', 
+                        color: THEME.textSecondary 
+                    }}>
+                        <MessageCircle size={48} strokeWidth={2.5} />
                     </div>
-                    <div style={{ display: 'flex', fontSize: '30px', color: '#6b21a8', fontWeight: 600, letterSpacing: '0.02em', marginBottom: '12px' }}>
-                        Dominant Tone
+                    <div style={{ fontSize: '56px', fontWeight: 800, color: THEME.textMain, lineHeight: 1 }}>
+                        {talkRatio}
                     </div>
-                    <div style={{ display: 'flex', fontSize: '56px', fontWeight: '800', color: '#4c1d95', lineHeight: 1 }}>{String(metricsMap['dominant_user_tone'] || 'N/A').toLowerCase()}</div>
+                    <div style={{ fontSize: '24px', fontWeight: 600, color: THEME.textSecondary, marginTop: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        You Talked
+                    </div>
                 </div>
 
-                {/* Metric 3: Scenario Specific */}
+                {/* Metric 3: Golden Phrases */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                    <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#d8b4fe', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px', color: '#581c87' }}>
-                        <ShieldAlert size={40} strokeWidth={2} />
+                    <div style={{ 
+                        width: '100px', 
+                        height: '100px', 
+                        borderRadius: '50%', 
+                        background: THEME.iconBg, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        marginBottom: '24px', 
+                        color: THEME.textSecondary 
+                    }}>
+                        <Heart size={48} strokeWidth={2.5} />
                     </div>
-                    <div style={{ display: 'flex', fontSize: '30px', color: '#6b21a8', fontWeight: 600, letterSpacing: '0.02em', marginBottom: '12px' }}>
-                        Escalation Moments
+                    <div style={{ fontSize: '56px', fontWeight: 800, color: THEME.textMain, lineHeight: 1 }}>
+                        {goldenPhraseCount}
                     </div>
-                    <div style={{ display: 'flex', fontSize: '56px', fontWeight: '800', color: '#4c1d95', lineHeight: 1 }}>{empathyExtra?.escalation_moments?.length || 0}</div>
+                    <div style={{ fontSize: '24px', fontWeight: 600, color: THEME.textSecondary, marginTop: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Golden Phrases
+                    </div>
                 </div>
 
             </div>

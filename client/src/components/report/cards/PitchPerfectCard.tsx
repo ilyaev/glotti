@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import type { SessionReport, PitchPerfectExtra } from '../../../types';
 import { formatMetricValue } from '../ReportUtils.js';
-import { Users, Clock, FileText } from 'lucide-react';
+import { Users, Clock, TrendingUp } from 'lucide-react';
 
 interface CardProps {
     report: SessionReport;
@@ -144,16 +144,16 @@ export const PitchPerfectCard = forwardRef<HTMLDivElement, CardProps>(({ report,
                             </div>
                         </div>
 
-                        {/* Structure Score Metric */}
+                        {/* Investability Score Metric */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-                            <div style={{ width: '72px', height: '72px', background: '#e0e7ff', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#312e81' }}>
-                                <FileText size={36} strokeWidth={2.5} />
+                            <div style={{ width: '72px', height: '72px', background: '#dcfce7', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#166534' }}>
+                                <TrendingUp size={36} strokeWidth={2.5} />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <div style={{ display: 'flex', fontSize: '32px', color: '#64748b', fontWeight: 600, letterSpacing: '0.02em' }}>Structure Score</div>
-                                <div style={{ display: 'flex', alignItems: 'baseline', fontSize: '48px', fontWeight: '800', color: '#0f172a', lineHeight: 1 }}>
-                                    <div style={{ display: 'flex' }}>{pitchExtra?.pitch_structure_score || 'N/A'}</div>
-                                    <div style={{ display: 'flex', fontSize: '30px', color: '#64748b', marginLeft: '8px' }}>/10</div>
+                                <div style={{ display: 'flex', fontSize: '32px', color: '#64748b', fontWeight: 600, letterSpacing: '0.02em' }}>Investability</div>
+                                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', fontSize: '48px', fontWeight: '800', color: '#0f172a', lineHeight: 1 }}>
+                                    {report.categories?.investment_potential?.score || 'N/A'}
+                                    <span style={{ fontSize: '30px', color: '#64748b', marginLeft: '8px', fontWeight: 600 }}>/10</span>
                                 </div>
                             </div>
                         </div>

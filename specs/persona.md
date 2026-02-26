@@ -198,7 +198,23 @@ export const PerformanceCard = forwardRef<HTMLDivElement, PerformanceCardProps>(
 ## 4. Prompt Engineering Best Practices
 
 For the best training experience, ensure your system prompts include:
-1.  **Strict Persona**: Remind the AI to stay in character and never break the fourth wall unless absolutely necessary.
-2.  **Interruption Rules**: Encourage the AI to use the barge-in capability (e.g., "Interrupt the user if they ramble or provide weak evidence").
-3.  **Progression**: Define how the scenario should evolve (e.g., "Start skeptical, but become more receptive if the user provides data").
-4.  **Tone Constraints**: Specify the desired emotional range (e.g., "Maintain a professional but cold demeanor").
+
+1.  **Strict Persona**: Remind the AI to stay in character and never break the fourth wall unless absolutely necessary (e.g., "You are a Tier-1 VC...").
+2.  **Interaction Rules with Hooks**: Define clear "hooks" for specific user behaviors that trigger immediate interventions.
+    *   *Example*: "If user says buzzwords like 'synergy', interrupt immediately and ask for plain English."
+    *   *Example*: "If user speaks for >45 seconds without a point, cut them off."
+3.  **Adaptive Intensity**: Structure the prompt to scale difficulty based on user performance.
+    *   "Start Neutral -> If good, get Tougher -> If bad, offer a Lifeline."
+4.  **Report Integration**: Ensure the persona prompt includes a section on "Post-Session Evaluation" that aligns with the fields defined in `server/config.ts`. The real-time persona needs to know what it will be grading later (e.g., "At the end, you will decide Pass/Invest").
+
+---
+
+## 5. Report System Guidelines
+
+When designing the `extraFields` for the report, prefer structured data over large text blobs:
+
+*   **Arrays of Strings**: Use `z.array(z.string())` for fix lists or bullet points (e.g., `specific_fixes`).
+*   **Binary/Enum Outcomes**: Capturing clear verdicts (e.g., "Pass/Invest", "Hired/Rejected") is better than generic scores.
+*   **Key Insight Pairs**: Use fields like `weakest_link` and `strongest_asset` to force the AI to make a choice, rather than a generic "summary".
+
+This structured approach makes the frontend visualization (Step 6) much more powerful than just rendering paragraphs of text.

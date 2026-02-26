@@ -46,14 +46,15 @@ export interface TranscriptCue {
 // ─── Extra field types per scenario ──────────────────────────────────────────
 
 export interface PitchPerfectExtra {
-  pitch_structure_score: number;
-  recommended_next_step: string;
+  weakest_link: string;
+  strongest_asset: string;
+  specific_fixes: string[];
 }
 
 export interface EmpathyTrainerExtra {
-  escalation_moments: string[];
-  best_empathy_phrases: string[];
-  alternative_phrases: string[];
+  trigger_moments: Array<{ timestamp: string; reason: string }>;
+  golden_phrases: string[];
+  better_alternatives: string[];
 }
 
 export interface VeritalkExtra {

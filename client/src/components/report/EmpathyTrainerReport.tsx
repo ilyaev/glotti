@@ -25,45 +25,52 @@ export function EmpathyTrainerReport({ data, onRestart, transcript, sessionId, u
             <PartnerInsightCard sessionId={sessionId} userId={userId} voiceName={data.voiceName} />
             <CategoryCards categories={data.categories} />
             <MetricsStrip metrics={data.metrics} displayMetrics={data.displayMetrics} />
-            {extra?.escalation_moments && extra.escalation_moments.length > 0 && (
+            <KeyMoments moments={data.key_moments} />
+
+            {extra?.trigger_moments && extra.trigger_moments.length > 0 && (
                 <div className="report__extra-card report__extra-card--warning">
-                    <div className="report__extra-card-header"><h3>Escalation Moments</h3></div>
+                    <div className="report__extra-card-header"><h3>Trigger Moments</h3></div>
                     <div className="report__extra-card-body">
-                        <p className="report__extra-hint">Moments where the conversation escalated or your language made things worse:</p>
-                        <div className="report__timestamp-chips">
-                            {extra.escalation_moments.map((ts, i) => (
-                                <span key={i} className="report__timestamp-chip report__timestamp-chip--warning">{ts}</span>
+                        <p className="report__extra-hint">Times you escalated tension or used "corporate speak":</p>
+                        <ul className="report__phrase-list">
+                            {extra.trigger_moments.map((t, i) => (
+                                <li key={i} className="report__phrase-item report__phrase-item--bad">
+                                    <span className="report__timestamp-chip report__timestamp-chip--warning">{t.timestamp}</span>
+                                    {t.reason}
+                                </li>
                             ))}
-                        </div>
+                        </ul>
                     </div>
                 </div>
             )}
-            <KeyMoments moments={data.key_moments} />
-            {extra?.best_empathy_phrases && extra.best_empathy_phrases.length > 0 && (
+
+            {extra?.golden_phrases && extra.golden_phrases.length > 0 && (
                 <div className="report__extra-card report__extra-card--success">
-                    <div className="report__extra-card-header"><h3>Best Empathetic Phrases</h3></div>
+                    <div className="report__extra-card-header"><h3>Golden Phrases</h3></div>
                     <div className="report__extra-card-body">
-                        <p className="report__extra-hint">Your most effective moments — use these as templates:</p>
+                        <p className="report__extra-hint">Your most effective empathetic responses:</p>
                         <ul className="report__phrase-list">
-                            {extra.best_empathy_phrases.map((phrase, i) => (
+                            {extra.golden_phrases.map((phrase, i) => (
                                 <li key={i} className="report__phrase-item report__phrase-item--good">"{phrase}"</li>
                             ))}
                         </ul>
                     </div>
                 </div>
             )}
-            {extra?.alternative_phrases && extra.alternative_phrases.length > 0 && (
+            
+            {extra?.better_alternatives && extra.better_alternatives.length > 0 && (
                 <div className="report__extra-card report__extra-card--info">
                     <div className="report__extra-card-header"><h3>Better Alternatives</h3></div>
                     <div className="report__extra-card-body">
                         <ul className="report__phrase-list">
-                            {extra.alternative_phrases.map((phrase, i) => (
+                            {extra.better_alternatives.map((phrase, i) => (
                                 <li key={i} className="report__phrase-item">{phrase}</li>
                             ))}
                         </ul>
                     </div>
                 </div>
             )}
+            
             <ImprovementTips tips={data.improvement_tips} />
             <Transcript lines={transcript} aiName={data.voiceName} />
             <ReportActions onRestart={onRestart} sessionId={sessionId} userId={userId} isShared={isShared} report={data} />

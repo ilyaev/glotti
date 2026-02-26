@@ -55,35 +55,33 @@ export const MODES: Record<string, ScenarioConfig> = {
     promptFile: 'server/agents/prompts/pitch-perfect.md',
     report: {
       promptIntro:
-        'You are a senior venture capitalist evaluating a founder\'s pitch. Your job is to score the quality of the investment thesis, not general speaking ability. Be direct, specific, and reference moments from the transcript.',
+        'You are a Tier-1 Venture Capitalist evaluating a startup pitch. You are skeptical, data-driven, and time-constrained. Your job is to decide if this is investable. Be blunt.',
       categories: {
+        investment_potential: {
+          label: 'Pass/Invest Verdict',
+          description: 'Would you take a second meeting? Rate 1-10 (1=Hard Pass, 10=Term Sheet). Explain why based on the "Weakest Link" and "Strongest Asset".',
+        },
         problem_clarity: {
           label: 'Problem Clarity',
-          description: 'Did the user make a clear, urgent, and credible case for the problem they are solving?',
-        },
-        solution_strength: {
-          label: 'Solution Strength',
-          description: 'Was the proposed solution compelling, differentiated, and clearly explained?',
+          description: 'Did the user make a clear, urgent, and credible case for the problem? did they avoid buzzwords?',
         },
         market_articulation: {
-          label: 'Market Opportunity',
-          description: 'Did the user convincingly articulate the addressable market (TAM/SAM/SOM) with credible numbers?',
+          label: 'Market Reality',
+          description: 'Did they know their numbers (CAC, LTV, TAM)? Did they admit competition exists?',
         },
         handling_pressure: {
-          label: 'Handling Tough Questions',
-          description: 'How effectively did the user respond to interruptions, challenges, and hard follow-up questions?',
-        },
-        delivery: {
-          label: 'Delivery & Conviction',
-          description: 'Did the user sound confident, avoid excessive filler words, and maintain an appropriate speaking pace?',
+          label: 'Q&A Performance',
+          description: 'Did the founder answer directly or dodge? Did they handle interruptions well?',
         },
       },
-      displayMetrics: ['total_filler_words', 'avg_words_per_minute', 'dominant_tone', 'interruption_recovery_avg_ms'],
+      displayMetrics: ['total_filler_words', 'avg_words_per_minute', 'avg_talk_ratio', 'interruption_recovery_avg_ms', 'dominant_tone'],
       extraFields: {
-        pitch_structure_score:
-          'A number 1-10 rating how well the pitch followed the classic structure: Problem → Solution → Market → Business Model → Ask.',
-        recommended_next_step:
-          'One concrete, actionable next step the person should take before their next pitch (string).',
+        weakest_link:
+          'The single part of the pitch that would kill the deal (string).',
+        strongest_asset:
+          'The best part of the pitch: Founder, Tech, or Market (string).',
+        specific_fixes:
+          'Array of 3 strings: specific actionable changes for the deck or script.',
       },
     },
   },
@@ -92,33 +90,33 @@ export const MODES: Record<string, ScenarioConfig> = {
     promptFile: 'server/agents/prompts/empathy-trainer.md',
     report: {
       promptIntro:
-        'You are a communication psychologist and conflict resolution expert evaluating how well the user handled a difficult emotional conversation. Focus on emotional intelligence — validation, active listening, and de-escalation — not speaking mechanics.',
+        'You are a conflict resolution expert evaluating the user\'s performance in a high-tension scenario. Focus on emotional intelligence, effective validation, and de-escalation skills. Be strict about dismissive language.',
       categories: {
-        empathy: {
-          label: 'Empathy',
-          description: 'Did the user validate the other person\'s feelings and show genuine understanding? Did they avoid dismissive language like "calm down" or "it\'s not that bad"?',
+        empathy_connection: {
+          label: 'Empathy Score',
+          description: 'Did the user genuinely connect (validating feelings) or just use scripted corporate speak? Rate 1-10.',
+        },
+        de_escalation_skill: {
+          label: 'De-escalation',
+          description: 'Did the user lower the tension? Did they avoid the "Fix-It" trap (solving before listening)?',
         },
         active_listening: {
           label: 'Active Listening',
-          description: 'Did the user ask good open-ended questions, leave space for the other person to speak, and reflect back what they heard?',
-        },
-        de_escalation: {
-          label: 'De-escalation',
-          description: 'Did the emotional temperature of the conversation decrease over time? Did the user\'s language contribute to calming the situation?',
+          description: 'Did the user listen without interrupting? Did they avoid the "But" trap ("I hear you, but...")?',
         },
         language_quality: {
           label: 'Language Precision',
-          description: 'Did the user avoid toxic patterns? Look for: overuse of "but" (negating prior empathy), "I" statements instead of "you" statements, defensive phrasing.',
+          description: 'Did the user avoid trigger words (calm down, policy, procedure) and use warm, human language?',
         },
       },
-      displayMetrics: ['avg_talk_ratio', 'dominant_tone', 'total_filler_words'],
+      displayMetrics: ['avg_talk_ratio', 'dominant_tone', 'total_filler_words', 'avg_words_per_minute'],
       extraFields: {
-        escalation_moments:
-          'An array of timestamp strings (mm:ss format) where the conversation escalated or the user said something that made the situation worse.',
-        best_empathy_phrases:
-          'An array of short string quotes from the user\'s actual dialogue that were the most effective empathetic responses.',
-        alternative_phrases:
-          'An array of strings, each being a specific suggestion: "Instead of [what they said], try: [better alternative]".',
+        trigger_moments:
+          'An array of objects: { "timestamp": string, "reason": string }. Moments where the user triggered an escalation.',
+        golden_phrases:
+          'An array of strings: The single best things the user said that helped the situation.',
+        better_alternatives:
+          'An array of strings: Specific phrasing improvements for their weak moments.',
       },
     },
   },

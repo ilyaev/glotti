@@ -1502,6 +1502,21 @@ body {
   background: rgba(79, 140, 255, 0.04);
 }
 
+.report__fixes-list {
+  margin: 0;
+  padding-left: var(--space-lg);
+}
+
+.report__fix-item {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-xs);
+}
+
+.report__fix-item:last-child {
+  margin-bottom: 0;
+}
+
 /* Half-width cards in a row (Veritalk) */
 .report__highlight-row {
   display: grid;

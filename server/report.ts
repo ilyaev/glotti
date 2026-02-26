@@ -49,14 +49,18 @@ const BaseReportSchema = z.object({
 
 // Extra field schemas per scenario
 const PitchPerfectExtraSchema = z.object({
-  pitch_structure_score: z.number().min(1).max(10),
-  recommended_next_step: z.string(),
+  weakest_link: z.string(),
+  strongest_asset: z.string(),
+  specific_fixes: z.array(z.string()),
 });
 
 const EmpathyTrainerExtraSchema = z.object({
-  escalation_moments: z.array(z.string()),
-  best_empathy_phrases: z.array(z.string()),
-  alternative_phrases: z.array(z.string()),
+  trigger_moments: z.array(z.object({
+    timestamp: z.string(),
+    reason: z.string(),
+  })),
+  golden_phrases: z.array(z.string()),
+  better_alternatives: z.array(z.string()),
 });
 
 const VeritalkExtraSchema = z.object({
