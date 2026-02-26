@@ -6,7 +6,7 @@ When a user completes a session, we evaluate whether a **celebration** is warran
 
 1. **First Session** — The very first completed session (detected via `localStorage`).
 2. **Milestone** — Reaching session counts 5, 10, 25, 50, or 100 (detected via sessions API).
-3. **High Score** — Scoring ≥ 80% on a session report (detected when the report arrives).
+3. **High Score** — Scoring ≥ 8 out of 10 on a session report (detected when the report arrives).
 
 For sessions that don't match any trigger, the existing `SessionEndingOverlay` is shown directly.
 
@@ -18,7 +18,7 @@ For sessions that don't match any trigger, the existing `SessionEndingOverlay` i
 type CelebrationVariant =
     | { kind: 'first_session' }
     | { kind: 'milestone'; count: number }   // 5, 10, 25, 50, 100
-    | { kind: 'high_score'; score: number }; // score >= 80
+    | { kind: 'high_score'; score: number }; // score >= 8 (1–10 scale)
 ```
 
 ### Variant Priority
@@ -38,9 +38,9 @@ Each variant maps to an **intensity level** (1–3) that scales particle counts 
 | milestone 5 | 1 | 50 | 1 burst |
 | milestone 10 | 2 | 80 | 3 bursts |
 | milestone 25+ | 3 | 120 | 6 bursts |
-| high_score 80–89% | 1 | 50 | 1 burst |
-| high_score 90–95% | 2 | 80 | 3 bursts |
-| high_score 96%+ | 3 | 120 | 6 bursts |
+| high_score 8 | 1 | 50 | 1 burst |
+| high_score 9 | 2 | 80 | 3 bursts |
+| high_score 10 | 3 | 120 | 6 bursts |
 
 ---
 
@@ -56,7 +56,7 @@ Session ends (status → 'ending')
     │   └── count+1 in [5,10,25,50,100]? → Show milestone celebration
     │
     ├── Wait for report to arrive
-    │   └── overall_score >= 80 AND no celebration showing? → Show high_score celebration
+    │   └── overall_score >= 8 AND no celebration showing? → Show high_score celebration
     │
     └── No triggers matched → Show SessionEndingOverlay directly
     
@@ -101,9 +101,9 @@ interface CongratulationsOverlayProps {
 | milestone 25 | Crown | "25 Sessions!" | "Quarter-century mark!" |
 | milestone 50 | Crown | "50 Sessions!" | "Halfway to the century!" |
 | milestone 100 | Flame | "100 Sessions!" | "You're a legend!" |
-| high_score 80-89 | Trophy | "Great Score!" | "{score}% — solid performance!" |
-| high_score 90-95 | Trophy | "Amazing!" | "{score}% — you're on fire!" |
-| high_score 96+ | Flame | "Perfect!" | "{score}% — absolutely flawless!" |
+| high_score 8 | Trophy | "Great Score!" | "8/10 — solid performance!" |
+| high_score 9 | Trophy | "Amazing!" | "9/10 — you're on fire!" |
+| high_score 10 | Flame | "Perfect!" | "10/10 — absolutely flawless!" |
 
 ### 4.3 Visual Composition (layered, back to front)
 
@@ -256,7 +256,7 @@ function Session({ mode, userId, onEnd }: Props) {
             pendingReportRef.current = report;
             return;
         }
-        if (report.overall_score >= 80) {
+        if (report.overall_score >= 8) {
             setCelebration({ kind: 'high_score', score: report.overall_score });
             pendingReportRef.current = report;
             return;
@@ -376,7 +376,7 @@ Access `#/_preview` in the browser to test all 9 variant×intensity combinations
 - [ ] First session: overlay appears with confetti + fireworks + text animations
 - [ ] Second session: overlay does NOT appear (goes straight to `SessionEndingOverlay`)
 - [ ] Milestone sessions (5, 10, 25, 50, 100): overlay appears with variant-specific icon/text
-- [ ] High score (≥ 80%): overlay appears after report arrives with score display
+- [ ] High score (≥ 8/10): overlay appears after report arrives with score display
 - [ ] Intensity scales correctly: more particles and firework bursts at higher tiers
 - [ ] Clear `localStorage` key `glotti_first_session_celebrated` → first_session overlay appears again
 - [ ] Overlay transitions smoothly — calls `onComplete` after ~4s

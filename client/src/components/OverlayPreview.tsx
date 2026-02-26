@@ -13,9 +13,9 @@ const VARIANT_PRESETS: Array<{ label: string; emoji: string; variant: Celebratio
     { label: 'Milestone 25', emoji: '👑', variant: { kind: 'milestone', count: 25 }, description: 'Crown icon — intensity 2' },
     { label: 'Milestone 50', emoji: '👑', variant: { kind: 'milestone', count: 50 }, description: 'Max intensity 3' },
     { label: 'Milestone 100', emoji: '👑', variant: { kind: 'milestone', count: 100 }, description: 'Legend tier' },
-    { label: 'High Score 82%', emoji: '🏅', variant: { kind: 'high_score', score: 82 }, description: 'Baseline high score' },
-    { label: 'High Score 91%', emoji: '🏅', variant: { kind: 'high_score', score: 91 }, description: 'Intensity 2' },
-    { label: 'High Score 97%', emoji: '🏅', variant: { kind: 'high_score', score: 97 }, description: 'Max intensity 3' },
+    { label: 'High Score 8/10', emoji: '🏅', variant: { kind: 'high_score', score: 8 }, description: 'Baseline high score' },
+    { label: 'High Score 9/10', emoji: '🏅', variant: { kind: 'high_score', score: 9 }, description: 'Intensity 2' },
+    { label: 'High Score 10/10', emoji: '🏅', variant: { kind: 'high_score', score: 10 }, description: 'Max intensity 3' },
 ];
 
 type ActiveOverlay = { type: 'congrats'; variant: CelebrationVariant } | { type: 'ending' } | null;

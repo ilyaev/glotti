@@ -6,7 +6,7 @@ import { Trophy, Heart, Swords, Zap, Target, Flame, Award, Crown } from 'lucide-
 export type CelebrationVariant =
     | { kind: 'first_session' }
     | { kind: 'milestone'; count: number }       // 5, 10, 25, 50, 100…
-    | { kind: 'high_score'; score: number };      // score ≥ 80
+    | { kind: 'high_score'; score: number };      // score ≥ 8 (1–10 scale)
 
 export interface CongratulationsOverlayProps {
     mode: string;
@@ -148,7 +148,11 @@ function getVariantSubtitle(variant: CelebrationVariant): string {
             if (variant.count >= 10) return 'Double digits — you\'re on fire!';
             return 'You\'re building a real habit!';
         }
-        case 'high_score': return `Score: ${variant.score}% — exceptional performance!`;
+        case 'high_score': {
+            if (variant.score >= 10) return `${variant.score}/10 — absolutely flawless!`;
+            if (variant.score >= 9) return `${variant.score}/10 — you're on fire!`;
+            return `${variant.score}/10 — solid performance!`;
+        }
     }
 }
 
@@ -162,8 +166,8 @@ function getIntensity(variant: CelebrationVariant): number {
             return 1;
         }
         case 'high_score': {
-            if (variant.score >= 95) return 3;
-            if (variant.score >= 90) return 2;
+            if (variant.score >= 10) return 3;
+            if (variant.score >= 9) return 2;
             return 1;
         }
     }

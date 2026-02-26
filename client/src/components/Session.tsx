@@ -30,8 +30,8 @@ export function Session({ mode, userId, onEnd }: Props) {
             pendingReportRef.current = report;
             return;
         }
-        // Check for high score celebration
-        if (report.overall_score >= 80) {
+        // Check for high score celebration (score is 1–10)
+        if (report.overall_score >= 8) {
             setCelebration({ kind: 'high_score', score: report.overall_score });
             pendingReportRef.current = report;
             return;
