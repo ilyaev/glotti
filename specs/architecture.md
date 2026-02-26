@@ -67,6 +67,9 @@
 | WebSocket Client | Native `WebSocket` API (custom hook) | Sends audio/video chunks to backend; receives audio responses and metric events |
 | Audio Playback | Web Audio API | Plays back Gemini's voice responses with interrupt handling |
 | Session Logic | `useSessionLogic` hook | Manages WS message dispatch, status state machine, timer, metrics & transcript state |
+| Share Modal | `ShareModal` orchestrator + `share/` sub-components | Share link generation, social sharing (X, LinkedIn, Facebook), OG image preview & download |
+| Share URL Logic | `useShareUrls` hook | Share key generation, API origin detection, memoized URL construction |
+| Clipboard | `useClipboard` hook | Reusable clipboard copy with automatic "copied" feedback state |
 | Dashboard UI | React components (TSX) | Renders live metrics (filler count, pace, tone gauge) and session controls |
 | Session Report | React component | Displays post-session summary with timestamps and scores |
 | Build/Dev | Vite | Fast HMR dev server and optimized production builds |
@@ -253,18 +256,26 @@ gemili/
 │       ├── components/
 │       │   ├── ModeSelect.tsx    # Mode selection cards
 │       │   ├── Session.tsx       # Slim session orchestrator (~50 LOC)
+│       │   ├── ShareModal.tsx    # Slim share modal orchestrator (~80 LOC)
 │       │   ├── Dashboard.tsx     # Live metrics dashboard
 │       │   ├── Report.tsx        # Post-session report
 │       │   ├── Waveform.tsx      # Audio waveform visualization
-│       │   └── session/          # Session sub-components (extracted from Session.tsx)
-│       │       ├── SessionTopbar.tsx        # Mode badge + timer
-│       │       ├── SessionEndingOverlay.tsx # Report-generation loading screen
-│       │       ├── SessionStatusDisplay.tsx # Connection/listening status text
-│       │       └── TranscriptFeed.tsx       # Live transcript list with auto-scroll
+│       │   ├── session/          # Session sub-components (extracted from Session.tsx)
+│       │   │   ├── SessionTopbar.tsx        # Mode badge + timer
+│       │   │   ├── SessionEndingOverlay.tsx # Report-generation loading screen
+│       │   │   ├── SessionStatusDisplay.tsx # Connection/listening status text
+│       │   │   └── TranscriptFeed.tsx       # Live transcript list with auto-scroll
+│       │   └── share/            # Share modal sub-components (extracted from ShareModal.tsx)
+│       │       ├── ShareLinkSection.tsx     # Transcript toggle + link input + copy
+│       │       ├── ShareCardPreview.tsx     # OG image preview + download + social icons
+│       │       ├── SocialPostPreview.tsx    # Reusable LinkedIn/Facebook post preview
+│       │       └── XIcon.tsx               # X (Twitter) SVG icon
 │       └── hooks/
 │           ├── useWebSocket.ts       # WebSocket connection hook
 │           ├── useAudio.ts           # Audio capture/playback hook
 │           ├── useSessionLogic.ts    # Session state machine, WS dispatch, timer
+│           ├── useShareUrls.ts       # Share key generation + URL construction
+│           ├── useClipboard.ts       # Reusable clipboard copy with feedback
 │           └── useVideo.ts           # Webcam capture hook
 ├── server/                       # Node.js + Express
 │   ├── main.ts                  # Express app entrypoint, injects shared store

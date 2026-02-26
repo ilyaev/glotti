@@ -67,11 +67,24 @@ When a report link is pasted into Slack, Discord, or LinkedIn, it should expand 
 *   Auth via share key middleware (`server/middleware/session-auth.ts`) — same key scheme as public report links.
 *   Mode-specific background images: pitch, empathy, impromptu, veritalk (loaded as base64 data URIs at startup).
 
-### 3.3 Enhanced Share Modal
-Upgrade the existing `ShareModal.tsx` to include:
-1.  **Native Sharing API:** Call `navigator.share()` on mobile devices for the best experience.
-2.  **Platform Quick-Links:** Buttons for LinkedIn, Twitter, and Facebook with pre-filled text.
-3.  **Download Image:** Button to save the Performance Card to the camera roll.
+### 3.3 Enhanced Share Modal (Refactored)
+The `ShareModal.tsx` has been refactored from a monolithic ~230 LOC component into a slim orchestrator (~80 LOC) backed by focused sub-components and custom hooks:
+
+**Hooks:**
+*   `useShareUrls` — Manages share key generation, API origin detection, and memoized URL construction (share gateway URL, server image URL).
+*   `useClipboard` — Reusable clipboard copy with automatic "copied" feedback state (used by 3 sub-components).
+
+**Sub-components** (`client/src/components/share/`):
+*   `ShareLinkSection` — Transcript toggle, share link display, and copy button.
+*   `ShareCardPreview` — OG image preview, native share, download card, and X/Twitter share button.
+*   `SocialPostPreview` — Reusable platform post preview (LinkedIn/Facebook) with copy-and-share functionality.
+*   `XIcon` — Standalone X (Twitter) SVG icon.
+
+**Features:**
+1.  **Native Sharing API:** `navigator.share()` on supported devices.
+2.  **Platform Quick-Links:** Buttons for LinkedIn, Twitter/X, and Facebook with pre-filled text.
+3.  **Download Image:** Button to save the server-rendered Performance Card PNG.
+4.  **Transcript Toggle:** Controls whether the shared link includes the full conversation transcript.
 
 ---
 
@@ -94,9 +107,9 @@ Upgrade the existing `ShareModal.tsx` to include:
 *   Use `html-to-image` on the client side to convert the component into a PNG blob.
 *   Allow users to "Download Card" or "Share Card", and optionally upload to a public bucket (like GCS) for OG `image` usage.
 
-### Phase 4: UI Enhancements
-*   Update `ShareModal.tsx` with social icons and platform-specific intent URLs.
-*   Update `ReportActions` to highlight the "Share" success if the user hits a personal best.
+### Phase 4: UI Enhancements ✅
+*   ✅ `ShareModal.tsx` refactored into slim orchestrator with extracted hooks (`useShareUrls`, `useClipboard`) and sub-components (`ShareLinkSection`, `ShareCardPreview`, `SocialPostPreview`, `XIcon`).
+*   `ReportActions` to highlight the "Share" success if the user hits a personal best. (pending)
 
 ---
 

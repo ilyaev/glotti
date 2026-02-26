@@ -26,18 +26,26 @@ gemili/
 │       ├── components/
 │       │   ├── ModeSelect.tsx
 │       │   ├── Session.tsx         # Slim orchestrator (~50 LOC)
+│       │   ├── ShareModal.tsx      # Slim share modal orchestrator (~80 LOC)
 │       │   ├── Dashboard.tsx
 │       │   ├── Report.tsx
 │       │   ├── Waveform.tsx
-│       │   └── session/            # Extracted session sub-components
-│       │       ├── SessionTopbar.tsx
-│       │       ├── SessionEndingOverlay.tsx
-│       │       ├── SessionStatusDisplay.tsx
-│       │       └── TranscriptFeed.tsx
+│       │   ├── session/            # Extracted session sub-components
+│       │   │   ├── SessionTopbar.tsx
+│       │   │   ├── SessionEndingOverlay.tsx
+│       │   │   ├── SessionStatusDisplay.tsx
+│       │   │   └── TranscriptFeed.tsx
+│       │   └── share/              # Extracted share modal sub-components
+│       │       ├── ShareLinkSection.tsx
+│       │       ├── ShareCardPreview.tsx
+│       │       ├── SocialPostPreview.tsx
+│       │       └── XIcon.tsx
 │       └── hooks/
 │           ├── useWebSocket.ts
 │           ├── useAudio.ts
 │           ├── useSessionLogic.ts  # WS dispatch, status machine, timer
+│           ├── useShareUrls.ts     # Share key generation + URL construction
+│           ├── useClipboard.ts     # Reusable clipboard copy with feedback
 │           └── useVideo.ts
 ├── server/
 │   ├── main.ts
