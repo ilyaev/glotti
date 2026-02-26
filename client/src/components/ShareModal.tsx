@@ -147,148 +147,149 @@ export function ShareModal({ sessionId, userId, onClose, report }: Props) {
 
                 <h2 className="share-modal__title">Share your report</h2>
 
-                <div className="share-modal__toggle-row">
-                    <span className="share-modal__toggle-label">Include full transcript</span>
-                    <label className="share-modal__switch">
-                        <input
-                            type="checkbox"
-                            checked={includeTranscript}
-                            onChange={(e) => setIncludeTranscript(e.target.checked)}
-                        />
-                        <span className="share-modal__switch-slider"></span>
-                    </label>
-                </div>
+                <div className="share-modal__body">
+                    {report && (
+                        <div className="share-modal__col-left">
+                            <div className="share-modal__toggle-row">
+                                <span className="share-modal__toggle-label">Include full transcript</span>
+                                <label className="share-modal__switch">
+                                    <input
+                                        type="checkbox"
+                                        checked={includeTranscript}
+                                        onChange={(e) => setIncludeTranscript(e.target.checked)}
+                                    />
+                                    <span className="share-modal__switch-slider"></span>
+                                </label>
+                            </div>
 
-                <p className="share-modal__subtitle">
-                    Anyone with this link can view your session report.
-                </p>
+                            <p className="share-modal__subtitle">
+                                Anyone with this link can view your session report.
+                            </p>
 
-                <div className="share-modal__link-row">
-                    <input
-                        className="share-modal__link-input"
-                        value={shareGatewayUrl}
-                        readOnly
-                        onFocus={e => e.target.select()}
-                    />
-                    <button
-                        className={`share-modal__copy-btn ${copied ? 'share-modal__copy-btn--copied' : ''}`}
-                        onClick={handleCopy}
-                    >
-                        {copied ? '✓' : 'Copy'}
-                    </button>
-                </div>
+                            <div className="share-modal__link-row">
+                                <input
+                                    className="share-modal__link-input"
+                                    value={shareGatewayUrl}
+                                    readOnly
+                                    onFocus={e => e.target.select()}
+                                />
+                                <button
+                                    className={`share-modal__copy-btn ${copied ? 'share-modal__copy-btn--copied' : ''}`}
+                                    onClick={handleCopy}
+                                >
+                                    {copied ? '✓' : 'Copy'}
+                                </button>
+                            </div>
 
-                {report && (
-                    <div className="share-modal__card-preview">
-                        {serverImageUrl ? (
-                            <img src={serverImageUrl} alt="Performance Card Preview" style={{width: '90%', paddingTop: '20px', paddingBottom: '20px'}} />
-                        ) : (
-                            <div className="share-modal__preview-placeholder">
-                                {sessionId && !sessionKey ? 'Generating preview...' : 'Preview unavailable'}
+                            <div className="share-modal__card-preview">
+                                {serverImageUrl ? (
+                                    <img src={serverImageUrl} alt="Performance Card Preview" style={{width: '90%', paddingTop: '20px', paddingBottom: '20px'}} />
+                                ) : (
+                                    <div className="share-modal__preview-placeholder">
+                                        {sessionId && !sessionKey ? 'Generating preview...' : 'Preview unavailable'}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="share-modal__socials">
+                                {canNativeShare && (
+                                    <button
+                                        className="btn btn--icon"
+                                        title="Share via device..."
+                                        onClick={handleNativeShare}
+                                    >
+                                        <Share2 size={20} />
+                                    </button>
+                                )}
+                                <button
+                                    className="btn btn--icon"
+                                    title="Download Image"
+                                    onClick={handleDownloadCard}
+                                    disabled={isDownloading || !serverImageUrl}
+                                >
+                                    <Download size={20} />
+                                </button>
+                                <button
+                                    className="btn btn--icon"
+                                    title="Share on X"
+                                    onClick={() => {
+                                        const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareGatewayUrl)}&text=${encodeURIComponent(twitterText)}`;
+                                        openShareWindow(twitterUrl);
+                                    }}
+                                >
+                                    <XIcon size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="share-modal__col-right">
+
+                        {report && (
+                            <div className="share-modal__social-list">
+                                <div className="share-modal__social-item">
+                                    <div className="share-modal__social-header">LinkedIn Post</div>
+                                    <div className="share-modal__social-box share-modal__social-box--preview">
+                                        <div className="share-modal__post-content">
+                                            {linkedinText}
+                                        </div>
+                                        <div className="share-modal__social-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
+                                            <button
+                                                className="btn btn--icon"
+                                                title="Share on LinkedIn"
+                                                onClick={() => {
+                                                    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareGatewayUrl)}`;
+                                                    handleCopyAndShare(`${linkedinText}\n\n${shareGatewayUrl}`, 'li', linkedinUrl);
+                                                }}
+                                            >
+                                                <Linkedin size={18} />
+                                            </button>
+                                            <button
+                                                className={`share-modal__copy-btn ${copiedLi ? 'share-modal__copy-btn--copied' : ''}`}
+                                                style={{ margin: 0 }}
+                                                onClick={() => handleCopySocial(`${linkedinText}\n\n${shareGatewayUrl}`, 'li')}
+                                            >
+                                                {copiedLi ? '✓ Copied' : 'Copy'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="share-modal__social-item">
+                                    <div className="share-modal__social-header">Facebook Post</div>
+                                    <div className="share-modal__social-box share-modal__social-box--preview">
+                                        <div className="share-modal__post-content">
+                                            {facebookText}
+                                        </div>
+                                        <div className="share-modal__social-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
+                                            <button
+                                                className="btn btn--icon"
+                                                title="Share on Facebook"
+                                                onClick={() => {
+                                                    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareGatewayUrl)}`;
+                                                    handleCopyAndShare(`${facebookText}\n\n${shareGatewayUrl}`, 'fb', facebookUrl);
+                                                }}
+                                            >
+                                                <Facebook size={18} />
+                                            </button>
+                                            <button
+                                                className={`share-modal__copy-btn ${copiedFb ? 'share-modal__copy-btn--copied' : ''}`}
+                                                style={{ margin: 0 }}
+                                                onClick={() => handleCopySocial(`${facebookText}\n\n${shareGatewayUrl}`, 'fb')}
+                                            >
+                                                {copiedFb ? '✓ Copied' : 'Copy'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
-                    </div>
-                )}
 
-                <div className="share-modal__socials">                    
-                    {canNativeShare && (
-                        <button
-                            className="btn btn--icon"
-                            title="Share via device..."
-                            onClick={handleNativeShare}
-                        >
-                            <Share2 size={20} />
+                        <button className="btn btn--outline report__share-btn share-modal__close-mobile" onClick={onClose}>
+                            Close
                         </button>
-                    )}
-                    <button
-                        className="btn btn--icon"
-                        title="Download Image"
-                        onClick={handleDownloadCard}
-                        disabled={isDownloading || !serverImageUrl}
-                    >
-                        <Download size={20} />
-                    </button>
-                    <button
-                        className="btn btn--icon"
-                        title="Share on X"
-                        onClick={() => {
-                            const twitterUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareGatewayUrl)}&text=${encodeURIComponent(twitterText)}`;
-                            openShareWindow(twitterUrl);
-                        }}
-                    >
-                        <XIcon size={18} />
-                    </button>
-                </div>
-
-                {report && (
-                    <div className="share-modal__social-list">
-                        <div className="share-modal__social-item">
-                            <div className="share-modal__social-header">LinkedIn Post</div>
-                            <div className="share-modal__social-box share-modal__social-box--preview">
-                                <div className="share-modal__post-content">
-                                    {linkedinText}
-                                    {/* <br /><br />
-                                    <span className="share-modal__post-link">{shareGatewayUrl}</span> */}
-                                </div>
-                                <div className="share-modal__social-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
-                                    <button
-                                        className="btn btn--icon"
-                                        title="Share on LinkedIn"
-                                        // style={{ width: '32px', height: '32px' }}
-                                        onClick={() => {
-                                            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareGatewayUrl)}`;
-                                            handleCopyAndShare(`${linkedinText}\n\n${shareGatewayUrl}`, 'li', linkedinUrl);
-                                        }}
-                                    >
-                                        <Linkedin size={18} />
-                                    </button>
-                                    <button
-                                        className={`share-modal__copy-btn ${copiedLi ? 'share-modal__copy-btn--copied' : ''}`}
-                                        style={{ margin: 0 }}
-                                        onClick={() => handleCopySocial(`${linkedinText}\n\n${shareGatewayUrl}`, 'li')}
-                                    >
-                                        {copiedLi ? '✓ Copied' : 'Copy'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="share-modal__social-item">
-                            <div className="share-modal__social-header">Facebook Post</div>
-                            <div className="share-modal__social-box share-modal__social-box--preview">
-                                <div className="share-modal__post-content">
-                                    {facebookText}
-                                    {/* <br /><br />
-                                    <span className="share-modal__post-link">{shareGatewayUrl}</span> */}
-                                </div>
-                                <div className="share-modal__social-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '4px' }}>
-                                    <button
-                                        className="btn btn--icon"
-                                        title="Share on Facebook"
-                                        // style={{ width: '32px', height: '32px' }}
-                                        onClick={() => {
-                                            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareGatewayUrl)}`;
-                                            handleCopyAndShare(`${facebookText}\n\n${shareGatewayUrl}`, 'fb', facebookUrl);
-                                        }}
-                                    >
-                                        <Facebook size={18} />
-                                    </button>
-                                    <button
-                                        className={`share-modal__copy-btn ${copiedFb ? 'share-modal__copy-btn--copied' : ''}`}
-                                        style={{ margin: 0 }}
-                                        onClick={() => handleCopySocial(`${facebookText}\n\n${shareGatewayUrl}`, 'fb')}
-                                    >
-                                        {copiedFb ? '✓ Copied' : 'Copy'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                )}
-
-                <button className="btn btn--outline report__share-btn" onClick={onClose}>
-                    Close
-                </button>
+                </div>
             </div>
         </div>
     );

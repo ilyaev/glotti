@@ -2342,6 +2342,40 @@ body {
   flex-direction: column;
 }
 
+/* Desktop 2-column layout */
+@media (min-width: 769px) {
+  .share-modal {
+    max-width: 880px;
+  }
+
+  .share-modal__body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  .share-modal__col-left {
+    position: sticky;
+    top: 0;
+  }
+
+  .share-modal__col-left .share-modal__card-preview {
+    margin-top: 0;
+    margin-bottom: 0;
+    aspect-ratio: auto;
+  }
+
+  .share-modal__col-right {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .share-modal__close-mobile {
+    display: none;
+  }
+}
+
 @media (max-width: 600px) {
   .share-modal__backdrop {
     padding: 0;
@@ -2353,6 +2387,12 @@ body {
     height: 100dvh;
     max-height: 100dvh;
     padding: var(--space-lg);
+  }
+
+  .share-modal__close-mobile {
+    display: block;
+    width: fit-content;
+    margin: var(--space-md) auto 0;
   }
 }
 
