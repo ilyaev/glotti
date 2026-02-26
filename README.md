@@ -195,6 +195,10 @@ See [specs/deployment.md](specs/deployment.md) for full deployment instructions 
 
 No changes to the WebSocket handler or session engine are needed — the persona-as-prompt architecture keeps mode additions purely declarative.
 
+Or just ask your AI coding agent:
+
+> Check `specs/persona.md` for instructions and add a new persona which is a ruthless negotiation opponent for salary and contract discussions
+
 ---
 
 ## License
