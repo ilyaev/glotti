@@ -90,3 +90,11 @@ export interface SessionFull {
   transcript: string[];
   report: SessionReport;
 }
+
+export type VisualizationType = 'classic' | 'tides_overlay' | 'tides_clash';
+
+export interface VisualizerProps {
+    userAnalyserRef: React.RefObject<AnalyserNode | null>;
+    aiAnalyserRef: React.RefObject<AnalyserNode | null>;
+    status: 'connecting' | 'listening' | 'speaking' | 'interrupted' | 'ending' | 'disconnected';
+}

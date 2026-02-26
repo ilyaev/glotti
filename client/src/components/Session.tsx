@@ -223,6 +223,7 @@ export function Session({ mode, userId, onEnd }: Props) {
                 userAnalyserRef={userAnalyserRef}
                 aiAnalyserRef={aiAnalyserRef}
                 status={status}
+                mode={mode}
             />
 
             {/* Dashboard */}
