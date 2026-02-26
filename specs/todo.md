@@ -71,3 +71,11 @@
 - [x] Add social share cards for LinkedIn/Facebook previews
 - [x] Refine mobile layout for standard sessions (fixed headers, loader)
 - [x] Refine mobile layout for shared reports (scrolling header)
+
+## Phase 10: Enhanced Visualization
+- [x] Spec out "Clashing Tides" visualization concept
+- [x] Refactor Waveform component to support multiple visualizers
+- [x] Implement ClassicWaveform (Legacy)
+- [x] Implement TidesVisualizer (Clash & Overlay modes)
+- [x] Update config to map modes to visualization types
+

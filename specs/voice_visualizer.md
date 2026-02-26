@@ -1,65 +1,76 @@
 # Voice Visualization System
 
 ## 1. Overview
-The current voice visualization system is implemented in `client/src/components/Waveform.tsx`. It provides a real-time, bidirectional visual representation of the conversation, distinguishing between the user's speech and the AI's response using a mirrored split-screen waveform design.
+The **Glotti** voice visualization system has been evolved into a multi-strategy rendering engine. It supports different visualization metaphors tailored to the specific emotional context of the active coaching mode.
 
-## 2. Technical Implementation
+| Visualization Mode | Variant | Description | Used In |
+|---|---|---|---|
+| **Classic** | `classic` | Mirrored vertical split-screen. Utilitarian and clear. | Impromptu |
+| **Clashing Tides** | `tides_clash` | Horizontal opposing forces. Competitive visual "push-of-war". | Pitch Perfect, Veritalk |
+| **Overlay Tides** | `tides_overlay` | Horizontal blending streams. Collaborative and harmonic. | Empathy Trainer |
 
-### Core Technology
-*   **Rendering:** HTML5 Canvas API (2D Context).
-*   **Animation Loop:** `requestAnimationFrame` for smooth 60fps updates.
-*   **Audio Source:** Web Audio API `AnalyserNode`.
-    *   `userAnalyserRef`: Connected to the user's microphone stream.
-    *   `aiAnalyserRef`: Connected to the incoming audio stream from the WebSocket.
+## 2. Architecture
 
-### Visual Components
+The visualization logic is decoupled from the main session view.
 
-The visualization is centered vertically (`centerY` = height / 2) and divided into two distinct zones:
+*   **Wrapper Component:** [`Waveform.tsx`](../client/src/components/Waveform.tsx)
+    *   Acts as a switcher.
+    *   Reads the current `mode` from props.
+    *   Lookups the correct `VisualizationType` from `config.ts`.
+    *   Renders the appropriate sub-component.
 
-1.  **Center Line / Idle State**
-    *   A persistent horizontal line indicates connectivity.
-    *   **Idle Animation:** When status is `connecting` or `listening` (but not speaking), a gentle sine wave ripple runs through the center line to indicate the system is "alive" and waiting.
-    *   *Equation:* `y = centerY + Math.sin(i * frequency + timeRef.current) * amplitude`
+*   **Configuration:** [`client/src/config.ts`](../client/src/config.ts) defines the `MODE_VISUALIZATION` mapping.
 
-2.  **User Waveform (Top Half)**
-    *   **Direction:** Projects upwards (negative Y).
-    *   **Color:** Teal / Green (`#5b8782`).
-    *   **Style:** Filled area with a glowing stroke on the outer edge.
-    *   **Shadow:** Cyan glow (`rgba(91, 135, 130, 0.5)`).
+## 3. Visualization Strategies
 
-3.  **AI Waveform (Bottom Half)**
-    *   **Direction:** Projects downwards (positive Y).
-    *   **Color:** Gold / Brown (`#c49a6c`).
-    *   **Style:** Filled area mirrored to the user's waveform.
-    *   **Shadow:** Warm amber glow (`rgba(196, 154, 108, 0.6)`).
+### 3.1 Classic Mode (Legacy)
+**Component:** `ClassicWaveform.tsx`
 
-## 3. Data Processing & Smoothing
+The original "Studio" visualization.
+*   **Layout:** Vertically centered split. User on Top (Negative Y), AI on Bottom (Positive Y).
+*   **Motion:** Scrolling history (Oscilloscope style) moving Right-to-Left.
+*   **Vibe:** Technical, precise, neutral.
 
-The visualizer does *not* draw the raw audio waveform (oscilloscope style). Instead, it visualizes a scrolling history of **volume intensity (RMS)** to create a "mountains" landscape effect.
+### 3.2 Tides System (New)
+**Component:** `TidesVisualizer.tsx`
 
-### 1. Volume Calculation (RMS)
-For every frame, the Root Mean Square (RMS) amplitude is calculated from the time-domain data of the `AnalyserNode`.
+A more organic, fluid visualization where sound waves originate from the screen edges and flow inward.
 
-### 2. Timeline History
-*   Two arrays (`userHistoryRef`, `aiHistoryRef`) store the last `50` volume points.
-*   New volume data is pushed to the end, and the oldest data is shifted out, creating a scrolling effect from right to left.
+*   **Layout:** Horizontal flow.
+    *   **User Stream:** Originates from **Left Edge**, flows Right.
+    *   **AI Stream:** Originates from **Right Edge**, flows Left.
+*   **Colors:**
+    *   User: Sage Green (`#5b8782`)
+    *   AI: Soft Gold (`#c49a6c`)
+    *   *Note: These match the Classic palette for consistency.*
 
-### 3. Smoothing Algorithms
-Two layers of smoothing are applied to prevent jittery visuals:
-1.  **Input Smoothing:** The instantaneous volume is interpolated with the previous frame's volume (`ease factor = 0.4`) before being added to the history array.
-2.  **Geometric Smoothing:** The points on the canvas are not connected with straight lines. A quadratic Bezier curve (`ctx.quadraticCurveTo`) is used to interpolate between points, creating a liquid, organic shape.
+#### Variant A: "Clash" (`tides_clash`)
+*   **Concept:** A power struggle.
+*   **Mechanic:** A "Battleground Line" shifts based on the relative volume of the speakers.
+    *   If User is louder, the line pushes to the **Right**.
+    *   If AI is louder (or interrupting), the line pushes to the **Left**.
+    *   Includes a visual "spark" line where the two forces meet.
+*   **Purpose:** Visualizes dominance and "holding your ground" in debates or pitches.
 
-## 4. State Management
+#### Variant B: "Overlay" (`tides_overlay`)
+*   **Concept:** Collaboration.
+*   **Mechanic:** The waves ignore collision and overlap in the center using `screen` blending mode.
+*   **Purpose:** Visualizes harmony and listening in empathy scenarios.
 
-The component reacts to the `status` prop:
+## 4. Technical Details
 
-| Status | Visual Behavior |
-|---|---|
-| `connecting` | Flat line with gentle ripple. |
-| `listening` | User waveform reacts to mic input. AI waveform is flat (but history updates). Center line ripples gently. |
-| `speaking` | AI waveform reacts to output audio. User waveform is flat. |
-| `interrupted` | (Currently treats as active state, visualization continues). |
-| `disconnected` | Animation continues but inputs are zeroed out. |
+### Canvas Rendering
+Both systems use the HTML5 Canvas 2D API for performance (~60fps).
 
-## 5. File Reference
-*   **Source:** [`client/src/components/Waveform.tsx`](../client/src/components/Waveform.tsx)
+### Smoothing
+*   **Input Smoothing:** Raw RMS volume is interpolated with previous frames (`delta * 0.3`) to prevent jitter.
+*   **Bezier Curves:** `ctx.quadraticCurveTo` is used to draw smooth liquid shapes instead of jagged line segments.
+
+### Coordinate Systems
+*   **User:** Standard Cartesian (0,0 is Top-Left).
+*   **AI (Tides):** Transformed Coordinate System:
+    ```typescript
+    ctx.translate(width, 0); // Move origin to right edge
+    ctx.scale(-1, 1);        // Flip X-axis
+    // Now drawing positive X moves 'left' visually
+    ```
