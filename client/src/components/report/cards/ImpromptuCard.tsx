@@ -171,7 +171,20 @@ export const ImpromptuCard = forwardRef<HTMLDivElement, CardProps>(({ report, is
                         <div style={{ display: 'flex', flexDirection: 'column', fontSize: '28px', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                             <span style={{ display: 'flex' }}>Topic</span>
                         </div>
-                        <div style={{ display: 'flex', fontSize: '20px', fontWeight: '800', color: '#ea580c', lineHeight: 1.2, textAlign: 'center', paddingTop: '8px' }}>{impromptuExtra?.assigned_topic || 'N/A'}</div>
+                        <div style={{ 
+                            display: '-webkit-box', 
+                            WebkitLineClamp: 3, 
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            fontSize: '20px', 
+                            fontWeight: '800', 
+                            color: '#ea580c', 
+                            lineHeight: 1.2, 
+                            textAlign: 'center', 
+                            paddingTop: '8px' 
+                        }}>
+                            {impromptuExtra?.assigned_topic || 'N/A'}
+                        </div>
                     </div>
 
                 </div>

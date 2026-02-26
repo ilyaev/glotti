@@ -207,8 +207,6 @@ For the best training experience, ensure your system prompts include:
     *   "Start Neutral -> If good, get Tougher -> If bad, offer a Lifeline."
 4.  **Report Integration**: Ensure the persona prompt includes a section on "Post-Session Evaluation" that aligns with the fields defined in `server/config.ts`. The real-time persona needs to know what it will be grading later (e.g., "At the end, you will decide Pass/Invest").
 
----
-
 ## 5. Report System Guidelines
 
 When designing the `extraFields` for the report, prefer structured data over large text blobs:
@@ -218,3 +216,14 @@ When designing the `extraFields` for the report, prefer structured data over lar
 *   **Key Insight Pairs**: Use fields like `weakest_link` and `strongest_asset` to force the AI to make a choice, rather than a generic "summary".
 
 This structured approach makes the frontend visualization (Step 6) much more powerful than just rendering paragraphs of text.
+
+## 6. Troubleshooting & Gotchas
+
+### Performance Card Rendering (Satori)
+When creating exportable cards in `client/src/components/report/cards/`, we use the `satori` library to convert HTML/JSX to SVG. This library has strict layout requirements:
+
+*   **Explicit Flexbox**: Always define `display: 'flex'` on container elements.
+*   **Unwrapped Text**: Do not leave text nodes as direct children of a flex container if they have siblings. Wrap text in a `<span>` or `<div>` and ensure that wrapper is also flex-enabled if necessary.
+*   **Implicit Defaults**: Satori does not always respect browser default styles (like `display: block` for divs). Be explicit: `display: 'flex', flexDirection: 'column'`.
+*   **Absolute Positioning**: If overlaying text on an image/SVG, ensure the container has explicit width/height and alignment properties (e.g., `justifyContent: 'center'`).
+

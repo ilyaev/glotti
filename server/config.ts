@@ -125,7 +125,7 @@ export const MODES: Record<string, ScenarioConfig> = {
     promptFile: 'server/agents/prompts/veritalk.md',
     report: {
       promptIntro:
-        'You are a debate coach and logician evaluating the user\'s argumentative performance. Focus on the quality of reasoning, evidence, and resilience under intellectual pressure. Reference specific exchanges from the transcript.',
+        'You are a World-Class Debate Champion evaluating the user\'s performance. You are adversarial, precise, and intellectually rigorous. Focus on logic gaps, fallacy detection, and how well the user withheld your pressure.',
       categories: {
         argument_coherence: {
           label: 'Argument Coherence',

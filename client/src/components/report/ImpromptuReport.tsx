@@ -33,18 +33,18 @@ export function ImpromptuReport({ data, onRestart, transcript, sessionId, userId
             <MetricsStrip metrics={data.metrics} displayMetrics={data.displayMetrics} />
             {extra?.silence_gaps_seconds !== undefined && extra.silence_gaps_seconds > 0 && (
                 <div className="report__extra-card report__extra-card--info">
-                    <div className="report__extra-card-header"><h3>Hesitation Time</h3></div>
+                    <div className="report__extra-card-header"><h3>Dead Air Check</h3></div>
                     <div className="report__extra-card-body">
                         <p>
-                            You spent approximately <strong>{extra.silence_gaps_seconds}s</strong> in silence or searching for words.
-                            Work on replacing pauses with deliberate filler-free bridges like "Here's why..." or "Let me put it this way..."
+                            You had approximately <strong>{extra.silence_gaps_seconds}s</strong> of silence.
+                            In improv, silence kills the scene. Use "Yes, and..." thinking to keep the momentum!
                         </p>
                     </div>
                 </div>
             )}
             {extra?.best_moment_quote && (
                 <div className="report__extra-card report__extra-card--success">
-                    <div className="report__extra-card-header"><h3>Best Moment</h3></div>
+                    <div className="report__extra-card-header"><h3>Scene Highlight</h3></div>
                     <div className="report__extra-card-body">
                         <blockquote className="report__best-quote">"{extra.best_moment_quote}"</blockquote>
                     </div>
@@ -53,7 +53,7 @@ export function ImpromptuReport({ data, onRestart, transcript, sessionId, userId
             <KeyMoments moments={data.key_moments} />
             {extra?.next_challenge && (
                 <div className="report__extra-card report__extra-card--action">
-                    <div className="report__extra-card-header"><h3>Next Challenge</h3></div>
+                    <div className="report__extra-card-header"><h3>Director's Note</h3></div>
                     <div className="report__extra-card-body">
                         <p className="report__next-step">{extra.next_challenge}</p>
                     </div>

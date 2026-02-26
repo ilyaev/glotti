@@ -24,7 +24,7 @@ export function VeritalkReport({ data, onRestart, transcript, sessionId, userId,
             <ScoreGauge score={data.overall_score} />
             <PartnerInsightCard sessionId={sessionId} userId={userId} voiceName={data.voiceName} />
             {(extra?.strongest_moment || extra?.weakest_moment) && (
-                <div className="report__highlight-row">
+                <div className="report__grid-row">
                     {extra.strongest_moment && (
                         <div className="report__extra-card report__extra-card--success report__extra-card--half">
                             <div className="report__extra-card-header"><h3>Strongest Moment</h3></div>
