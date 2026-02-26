@@ -260,7 +260,9 @@ gemili/
 │       │   ├── Dashboard.tsx     # Live metrics dashboard
 │       │   ├── Report.tsx        # Post-session report
 │       │   ├── Waveform.tsx      # Audio waveform visualization
+│       │   ├── OverlayPreview.tsx # Secret preview page for celebration overlays (#/_preview)
 │       │   ├── session/          # Session sub-components (extracted from Session.tsx)
+│       │   │   ├── CongratulationsOverlay.tsx # Celebration overlay (confetti + fireworks + variants)
 │       │   │   ├── SessionTopbar.tsx        # Mode badge + timer
 │       │   │   ├── SessionEndingOverlay.tsx # Report-generation loading screen
 │       │   │   ├── SessionStatusDisplay.tsx # Connection/listening status text

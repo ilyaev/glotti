@@ -30,7 +30,9 @@ gemili/
 │       │   ├── Dashboard.tsx
 │       │   ├── Report.tsx
 │       │   ├── Waveform.tsx
+│       │   ├── OverlayPreview.tsx  # Secret preview page (#/_preview)
 │       │   ├── session/            # Extracted session sub-components
+│       │   │   ├── CongratulationsOverlay.tsx # Celebration overlay (confetti + fireworks)
 │       │   │   ├── SessionTopbar.tsx
 │       │   │   ├── SessionEndingOverlay.tsx
 │       │   │   ├── SessionStatusDisplay.tsx

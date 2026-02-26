@@ -123,3 +123,19 @@
 - [x] Verify clean TypeScript compilation (no new errors)
 - [x] Update architecture.md file structure and component table
 
+## Phase 14: Visual Rewards — Celebration Overlays
+- [x] Create specs/visual_rewards.md with full celebration overlay spec
+- [x] Create CongratulationsOverlay component (confetti + fireworks canvas particle system)
+- [x] Add celebration CSS animations to index.css (keyframes, sparkles, reduced-motion)
+- [x] Implement CelebrationVariant types (first_session, milestone, high_score)
+- [x] Implement firework particle system (radial bursts, trails, glow effects)
+- [x] Implement intensity scaling (1–3) based on variant kind and thresholds
+- [x] Integrate celebrations into Session.tsx (report interception, pendingReportRef)
+- [x] Implement first-session detection via localStorage
+- [x] Implement milestone detection via sessions API (thresholds: 5, 10, 25, 50, 100)
+- [x] Implement high-score detection via report interception (score ≥ 80%)
+- [x] Create OverlayPreview.tsx secret testing page (#/_preview) with 9 variant presets
+- [x] Add overlay-preview route to App.tsx hash router
+- [x] Verify clean TypeScript compilation
+- [x] Update architecture.md with new components
+
