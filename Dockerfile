@@ -11,9 +11,13 @@ COPY client/ ./client/
 
 # Install all dependencies (including devDeps like tsc)
 RUN npm ci
+RUN cd client && npm ci
 
 # Build the server (generates /app/dist)
 RUN npm run build:server
+
+# Build the client (generates /app/client-dist)
+RUN npm run build:client
 
 # --- Stage 2: Runtime ---
 FROM node:22-slim
@@ -26,6 +30,8 @@ RUN npm ci --production
 
 # Copy compiled code from builder stage
 COPY --from=builder /app/dist/ ./dist/
+# Copy client build
+COPY --from=builder /app/client-dist/ ./client-dist/
 # Copy prompts
 COPY --from=builder /app/server/agents/prompts/ ./server/agents/prompts/
 # Copy Satori SSR Assets (Fonts & Backgrounds)

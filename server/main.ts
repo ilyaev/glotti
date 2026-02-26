@@ -43,9 +43,21 @@ app.get('/health', (_, res) => res.json({ status: 'ok', mode: config.isDev ? 'de
 app.use('/api/sessions', createSessionsRouter(store));
 
 
-// ─── For development, serve the Vite-built client files ───────────────────────
-if (config.isDev) {
-  app.use(express.static(join(__dirname, '..', 'client-dist')));
+// ─── Serve the Vite-built client files (production only) ──────────────────────
+const clientDistPath = join(__dirname, '..', '..', 'client-dist');
+console.log(`  ➜ isDev: ${config.isDev}`);
+console.log(`  ➜ client-dist path: ${clientDistPath}`);
+import { existsSync, readdirSync } from 'fs';
+if (existsSync(clientDistPath)) {
+  console.log(`  ➜ client-dist exists, contents: ${readdirSync(clientDistPath).join(', ')}`);
+} else {
+  console.log(`  ➜ client-dist does NOT exist`);
+}
+if (!config.isDev) {
+  console.log(`  ➜ Serving static files from ${clientDistPath}`);
+  app.use(express.static(clientDistPath));
+} else {
+  console.log(`  ➜ Skipping static files (dev mode)`);
 }
 
 // ─── WebSocket connections ────────────────────────────────────────────────────
