@@ -46,7 +46,7 @@ export function ShareModal({ sessionId, userId, onClose, report }: Props) {
     // Ensure we remove any trailing slashes from the environment variable if present.
     const rawApiUrl = import.meta.env.VITE_API_URL;
     const cleanApiUrl = rawApiUrl ? rawApiUrl.replace(/\/$/, '') : null;
-    const apiOrigin = cleanApiUrl || (window.location.hostname === 'localhost' ? 'http://localhost:8080' : window.location.origin);
+    const apiOrigin = cleanApiUrl || (window.location.hostname === 'localhost' ? 'http://localhost:5173' : window.location.origin);
 
     // Construct the canonical server-side OG image URL
     const serverImageUrl = sessionId && sessionKey ? `${apiOrigin}/api/sessions/shared/og-image/${sessionId}/${sessionKey}` : null;

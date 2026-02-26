@@ -43,12 +43,12 @@ export function SessionDetail({ sessionId, userId, shareKey, onRestart }: Props)
         <div className="session-detail">
             <div className={`session-detail__nav ${shareKey ? 'session-detail__nav--shared' : ''}`}>
                 <div className="session-detail__nav-inner">
-                    <button
+                    <a
                         className={`sessions-logo ${shareKey ? 'sessions-logo--shared' : ''}`}
                         onClick={() => { window.location.hash = ''; }}
                     >
                         <img className="logo-img--small" src="/glotti_logo.png" alt="Glotti" />
-                    </button>
+                    </a>
                     {!shareKey && (
                         <button className="sessions-back-btn" onClick={() => navigateTo('sessions')}>
                             ← All Sessions

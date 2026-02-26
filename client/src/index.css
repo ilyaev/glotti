@@ -289,6 +289,8 @@ body {
   justify-content: center;
   margin-top: var(--space-lg);
   animation: fadeUp 0.4s ease-out 0.2s both;
+  width: 100%;
+  padding-bottom: var(--space-lg);
 }
 
 /* ===== Report Partner Info ===== */
@@ -313,13 +315,25 @@ body {
   font-weight: 600;
 }
 
-/* On desktop: pull to top-right corner, out of content flow */
 @media (min-width: 769px) {
   .home-sessions-bar {
     position: absolute;
-    top: var(--space-lg);
-    right: var(--space-xl);
+    top: var(--space-xl);
+    left: 0; 
+    right: 0;
+    margin: 0 auto;
+    max-width: 1400px; /* Match .mode-cards width */
+    width: 100%;
     margin-top: 0;
+    pointer-events: none;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: var(--space-lg); /* Add padding to account for container padding if needed */
+    z-index: 100;
+  }
+
+  .home-sessions-btn {
+    pointer-events: auto;
   }
 }
 
@@ -338,6 +352,20 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 768px) {
+  .home-sessions-bar {
+    padding-bottom: var(--space-2xl); /* Bottom padding for mobile */
+  }
+
+  .home-sessions-btn {
+    width: 100%;
+    justify-content: center;
+    padding: var(--space-md);
+    background: #ffffff; /* Solid white for better readability on mobile bg */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); /* Slightly more prominent shadow */
+  }
 }
 
 .home-sessions-btn:hover {
@@ -1842,12 +1870,7 @@ body {
   animation: fadeUp 0.4s ease-out;
 }
 
-@media (max-width: 768px) {
-  .sessions-page {
-    padding: var(--space-md);
-  }
-}
-
+/* Default/Shared Header Styles */
 .sessions-page__header {
   border-bottom: 1px solid var(--border-subtle);
   padding: var(--space-sm) var(--space-xl);
@@ -1859,6 +1882,36 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+@media (max-width: 768px) {
+  .sessions-page {
+    padding: 0 var(--space-md) var(--space-md);
+    margin-top: 80px; /* Space for fixed header */
+    animation: none; /* Prevent transform from breaking fixed header */
+  }
+
+  .sessions-page__header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    margin: 0;
+    padding: var(--space-lg) var(--space-md) var(--space-sm);
+    background: white;
+    border-bottom: 1px solid var(--border-subtle);
+    z-index: 1000;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  .sessions-page__title {
+    font-size: 18px;
+  }
+
+  .sessions-page__count {
+    display: none;
+  }
 }
 
 .sessions-page__header-inner {
@@ -1883,7 +1936,7 @@ body {
 }
 
 .logo-img--small {
-  height: 80px;
+  height: 96px;
   width: auto;
   object-fit: contain;
   display: block;
@@ -1923,7 +1976,7 @@ body {
 
 .sessions-page__title {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 36px;
   font-weight: 600;
   margin: 0;
   color: var(--text-primary);
@@ -1959,7 +2012,7 @@ body {
   background: none;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
-  padding: 4px 12px;
+  padding: 4px 12px 0px;
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
@@ -1967,7 +2020,7 @@ body {
   transition: all 0.2s ease;
   flex-shrink: 0;
   position: absolute;
-  left: 0;
+  left: 10px;
 }
 
 
@@ -2495,12 +2548,14 @@ body {
   animation: fadeUp 0.4s ease-out;
 }
 
+/* Default/Shared Header Styles */
 .session-detail__nav {
   display: flex;
   align-items: center;
   gap: var(--space-md);
   padding: var(--space-md) var(--space-xl);
-  max-width: 900px;
+  /* max-width: 900px; */
+  width: 100%;
   margin: 0 auto;
   position: sticky;
   top: 0;
@@ -2514,6 +2569,8 @@ body {
   align-items: center;
   width: 100%;
   position: relative;
+  max-width: 900px; /* Constrain content width */
+  margin: 0 auto;
 }
 
 @media (min-width: 769px) {
@@ -2548,8 +2605,23 @@ body {
 }
 
 @media (max-width: 768px) {
+  .session-detail {
+    animation: none;
+    padding: 0 var(--space-md) var(--space-md);
+    margin-top: 80px;
+  }
+
   .session-detail__nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
     padding: var(--space-md);
+    background: white; /* Ensure opaque background */
+    z-index: 1000;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin: 0;
   }
 }
 
@@ -2575,7 +2647,7 @@ body {
   }
 
   .sessions-logo--shared .logo-img--small {
-    height: 64px !important;
+    height: 96px !important;
     /* Smaller logo for shared mobile */
   }
 }

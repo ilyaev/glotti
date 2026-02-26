@@ -70,12 +70,6 @@ export function SessionsList({ userId }: Props) {
             .catch(err => { setError(err.message); setLoading(false); });
     }, [userId]);
 
-    // console.log(sessions);
-    if (sessions[0]) {
-        sessions[0].preview_text = "I really want to improve my public speaking skills, especially for work presentations. I get really nervous and tend to rush through my slides. I want to learn how to pace myself better and engage the audience more effectively. Can you give me some tips on how to stay calm and deliver a more confident presentation?";
-        sessions[0].voiceName = "Alice";
-    }
-
     return (
         <div className="sessions-page">
             {/* Header */}

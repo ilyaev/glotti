@@ -57,6 +57,8 @@ export interface SessionSummary {
   startedAt: Date;
   duration_seconds: number;
   overall_score: number;
+  preview_text: string;
+  voiceName: string;
 }
 
 export interface SessionStore {
@@ -124,6 +126,8 @@ export class FileStore implements SessionStore {
           startedAt: session.startedAt,
           duration_seconds: session.report?.duration_seconds ?? 0,
           overall_score: session.report?.overall_score ?? 0,
+          preview_text: session.report?.social_share_texts?.performance_card_summary ?? '',
+          voiceName: session.voiceName ?? 'AI Coach',
         });
       }
     }
