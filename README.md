@@ -56,14 +56,27 @@ Practice building structure on the fly with surprise topics. Evaluated on clarit
 ### High-Level Overview
 
 ```mermaid
-graph LR
-    Client["Browser Client<br/>React + Vite"] <-->|"WebSocket<br/>audio PCM / JSON"| Backend["Node.js Backend<br/>Express + ws"]
-    Backend <-->|"Gemini Live API<br/>audio / transcript"| Gemini["Gemini<br/>2.5 Flash"]
+graph TB
+    subgraph User["👤 User"]
+        Browser["Browser<br/>(React SPA)"]
+    end
 
-    Backend --- Persona["Persona Agent<br/>(persona-driven conversation)"]
-    Backend --- ADK["Google ADK<br/>(report gen, analytics, tone)"]
-    Backend --- Firestore["Firestore<br/>(session persistence & reports)"]
-    ADK --- Gemini2["Gemini 2.5 Flash<br/>(non-streaming)"]
+    subgraph Backend["☁️ Cloud Run"]
+        Server["Node.js Server<br/>(Express + WebSocket)"]
+    end
+
+    subgraph Google["🔷 Google Cloud & AI"]
+        Gemini["Gemini 2.5 Flash<br/>(Live API)"]
+        Firestore["Firestore<br/>(Session Storage)"]
+        Search["Google Search<br/>(Grounding)"]
+    end
+
+    Browser -- "WebSocket<br/>(audio + events)" --> Server
+    Server -- "WebSocket<br/>(audio responses + metrics)" --> Browser
+    Server -- "WebSocket<br/>(streaming audio)" --> Gemini
+    Gemini -- "WebSocket<br/>(voice + transcriptions)" --> Server
+    Server -- "REST<br/>(read/write sessions)" --> Firestore
+    Gemini -. "Grounding queries<br/>(Veritalk mode)" .-> Search
 ```
 
 ### Key Technical Decisions
