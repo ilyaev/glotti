@@ -24,7 +24,7 @@
                                                       ├─► session/feedback-context.ts (feedback mode injection)
                                                       ├─► session/constants.ts       (tunable thresholds)
                                                       ├─► store.ts                   (session persistence)
-                                                      ├─► report.ts                  (post-session report generation)
+                                                      ├─► report.ts                  (post-session report via ADK Runner.runAsync())
                                                       └─► config.ts                  (mode definitions, prompts)
 ```
 
@@ -115,7 +115,7 @@ Binary message format: `{"type":"audio"|"video"}\n<raw bytes>`
    b. Client → Server: forward audio/video to Gemini, handle commands
 9. ON 'end_session' command OR timeout:
    a. CLOSE Gemini session
-   b. IF not feedback mode: GENERATE report via report.ts
+   b. IF not feedback mode: GENERATE report via report.ts (ADK Runner.runAsync())
    c. SAVE session to store
    d. SEND report to client
 10. ON client disconnect: close Gemini session

@@ -139,3 +139,41 @@
 - [x] Verify clean TypeScript compilation
 - [x] Update architecture.md with new components
 
+## Phase 15: Google ADK Integration (Partial — Live API Not Available in TS SDK)
+
+> **Key constraint:** ADK TypeScript SDK v0.4.0 does not implement `Runner.runLive()`.
+> Live audio streaming remains on raw `genai.live.connect()` via `gemini-bridge.ts`.
+> ADK is used only for non-streaming operations.
+
+### Foundation
+- [x] Install `@google/adk` (v0.4.0)
+- [x] Create `server/adk/` directory (agents.ts, runner.ts, tools.ts, index.ts)
+- [x] Define ADK `LlmAgent` for coaching, report, transcript summarizer, metrics analyzer
+- [x] Create `FunctionTool` wrapper for `extractMetrics()` with Zod schema
+- [x] Set up `InMemorySessionService` singleton + `Runner` factory
+- [x] Create `runReportAgent()` using `Runner.runAsync()`
+
+### Integration
+- [x] Migrate report generation from raw `genai.models.generateContent()` to ADK `Runner.runAsync()`
+- [x] Migrate analytics agent from raw `generateContent()` to ADK `LlmAgent` + `InMemoryRunner.runEphemeral()`
+- [x] Migrate tone analyzer from raw `generateContent()` to ADK `LlmAgent` + `InMemoryRunner.runEphemeral()`
+- [x] Alias `GOOGLE_API_KEY` → `GOOGLE_GENAI_API_KEY` env var for ADK compatibility
+
+### Config & Model Fixes
+- [x] Update `geminiModel` from expired `gemini-2.5-flash-native-audio-preview-12-2025` to `gemini-2.5-flash-native-audio-latest`
+- [x] Make model configurable via `GEMINI_MODEL` env var
+- [x] Mark legacy `coaching-agent.ts` as `@deprecated`
+
+### Documentation
+- [x] Update `specs/adk_review.md` with implementation status and Phase 0/1/2/6 results
+- [x] Update `specs/architecture.md` (component table, file structure, ADK notes)
+- [x] Update `specs/todo.md` with Phase 15
+
+### Deferred (pending ADK TS SDK `runLive` support)
+- [ ] Replace `gemini-bridge.ts` with ADK `Runner.runLive()` + `LiveRequestQueue`
+- [ ] Replace manual WS message routing with ADK Event loop
+- [ ] Create `ParallelAgent` orchestrator (Coaching + Analytics)
+- [ ] Create `SequentialAgent` report pipeline (summarizer → metrics → report writer)
+- [ ] Enable session resumption via `RunConfig.sessionResumption`
+- [ ] Enable context compression for long sessions
+

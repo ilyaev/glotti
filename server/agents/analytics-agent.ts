@@ -1,12 +1,10 @@
-import { GoogleGenAI } from '@google/genai';
-import { config } from '../config.js';
+import { LlmAgent, InMemoryRunner, type Event, isFinalResponse } from '@google/adk';
 import type { MetricSnapshot } from '../store.js';
-
-const genai = new GoogleGenAI({ apiKey: config.googleApiKey });
 
 /**
  * Analytics Agent — processes transcript chunks and returns structured metrics.
  *
+ * Now implemented as an ADK LlmAgent using InMemoryRunner.runAsync().
  * This agent runs separately from the voice session. It receives periodic
  * transcript text and returns JSON metrics (filler words, WPM, tone, etc.)
  * that are displayed on the client dashboard in real-time.
@@ -33,23 +31,41 @@ Rules:
 - Return ONLY the JSON, no markdown fences or explanation
 `;
 
+const analyticsAgent = new LlmAgent({
+  name: 'analytics_agent',
+  model: 'gemini-2.5-flash',
+  instruction: ANALYTICS_PROMPT,
+  description: 'Analyzes speech transcript chunks and returns structured metrics',
+  outputKey: 'latest_metrics',
+});
+
+const runner = new InMemoryRunner({
+  agent: analyticsAgent,
+  appName: 'glotti',
+});
+
 export async function analyzeTranscript(
   transcriptChunk: string
 ): Promise<MetricSnapshot | null> {
   try {
-    const response = await genai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: [{
+    let result = '';
+    for await (const event of runner.runEphemeral({
+      userId: 'system',
+      newMessage: {
         role: 'user',
         parts: [{ text: `Analyze this transcript chunk:\n\n"${transcriptChunk}"` }],
-      }],
-      config: {
-        systemInstruction: ANALYTICS_PROMPT,
       },
-    });
+    })) {
+      if (event.content?.parts) {
+        for (const part of event.content.parts) {
+          if (part.text) {
+            result += part.text;
+          }
+        }
+      }
+    }
 
-    const text = response.text || '{}';
-    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const cleaned = (result || '{}').replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const parsed = JSON.parse(cleaned);
 
     return {

@@ -1,10 +1,27 @@
 import type { GoogleGenAI } from '@google/genai';
+import { InMemoryRunner, LlmAgent } from '@google/adk';
 import { TONE_CHECK_INTERVAL_MS, TONE_ANALYSIS_TEXT_LIMIT, TONE_MIN_WORDS } from './constants.js';
 
 export interface ToneResult {
   tone: string;
   hint: string;
 }
+
+const toneAgent = new LlmAgent({
+  name: 'tone_analyzer',
+  model: 'gemini-2.5-flash',
+  instruction: `You are a speech tone analyzer. Analyze text from a user in a speech training session.
+Return a JSON object with two fields:
+- "tone": exactly one word describing the emotional tone (e.g., Confident, Nervous, Defensive, Excited, Thoughtful, Frustrated)
+- "hint": a very short, one-sentence actionable training hint. Empty string if no hint needed.
+Return ONLY the JSON object.`,
+  description: 'Analyzes emotional tone and provides coaching hints',
+});
+
+const toneRunner = new InMemoryRunner({
+  agent: toneAgent,
+  appName: 'glotti',
+});
 
 export class ToneAnalyzer {
   private lastCheck = Date.now();
@@ -27,9 +44,8 @@ export class ToneAnalyzer {
   }
 
   /**
-   * Trigger a background tone analysis if enough time has passed and enough text exists.
+   * Trigger a background tone analysis via ADK Runner if enough time has passed.
    * Returns a promise that resolves to the new tone/hint if analysis was triggered, null otherwise.
-   * The caller can optionally await or fire-and-forget.
    */
   tryAnalyze(allUserText: string): Promise<ToneResult | null> | null {
     const now = Date.now();
@@ -41,15 +57,25 @@ export class ToneAnalyzer {
 
     this.lastCheck = now;
 
-    return this.genai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: `Analyze the following text from a user in a speech training session. Return a JSON object with two fields: "tone" (exactly one word describing the emotional tone of the speaker, e.g., Confident, Nervous, Defensive, Excited, Thoughtful, Frustrated) and "hint" (a very short, one-sentence actionable training hint for the user based on the current context). If no specific hint is needed, "hint" can be empty.\n\nText: "${allUserText.slice(-TONE_ANALYSIS_TEXT_LIMIT)}"`,
-      config: {
-        responseMimeType: "application/json"
-      }
-    }).then(res => {
+    const analyzeAsync = async (): Promise<ToneResult | null> => {
       try {
-        const json = JSON.parse(res.text || '{}');
+        let result = '';
+        for await (const event of toneRunner.runEphemeral({
+          userId: 'system',
+          newMessage: {
+            role: 'user',
+            parts: [{ text: `Analyze this text:\n\n"${allUserText.slice(-TONE_ANALYSIS_TEXT_LIMIT)}"` }],
+          },
+        })) {
+          if (event.content?.parts) {
+            for (const part of event.content.parts) {
+              if (part.text) result += part.text;
+            }
+          }
+        }
+
+        const cleaned = (result || '{}').replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        const json = JSON.parse(cleaned);
         const newTone = json.tone ? json.tone.trim().replace(/[^a-zA-Z]/g, '') : null;
         const newHint = json.hint ? `${json.hint}` : '';
 
@@ -60,12 +86,11 @@ export class ToneAnalyzer {
         }
         return null;
       } catch (e) {
-        console.error(`   [${this.sessionId}] Failed to parse LLM JSON response:`, e);
+        console.error(`   [${this.sessionId}] Tone analysis failed:`, e);
         return null;
       }
-    }).catch(err => {
-      console.error(`   [${this.sessionId}] Background tone/hint analysis failed:`, err);
-      return null;
-    });
+    };
+
+    return analyzeAsync();
   }
 }

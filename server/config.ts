@@ -5,12 +5,17 @@ import { fileURLToPath } from 'url';
 
 dotenv.config();
 
+// ADK reads GOOGLE_GENAI_API_KEY or GEMINI_API_KEY — alias GOOGLE_API_KEY so it's found
+if (!process.env.GOOGLE_GENAI_API_KEY && !process.env.GEMINI_API_KEY && process.env.GOOGLE_API_KEY) {
+  process.env.GOOGLE_GENAI_API_KEY = process.env.GOOGLE_API_KEY;
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export const config = {
   googleApiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY!,
   googleCloudProject: process.env.GOOGLE_CLOUD_PROJECT,
-  geminiModel: 'gemini-2.5-flash-native-audio-preview-12-2025',
+  geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash-native-audio-latest',
   port: parseInt(process.env.PORT || '8080'),
   isDev: process.env.NODE_ENV !== 'production',
   voices: ['Puck', 'Charon', 'Kore', 'Fenrir', 'Aoede'] as const,

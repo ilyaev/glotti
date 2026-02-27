@@ -72,9 +72,14 @@ gemili/
 │   │   ├── tone-analyzer.ts
 │   │   ├── protocol.ts
 │   │   └── feedback-context.ts
+│   ├── adk/                       # Google ADK integration (non-streaming only — runLive not available in TS SDK)
+│   │   ├── agents.ts              # LlmAgent definitions (coaching, report, summarizer, metrics)
+│   │   ├── runner.ts              # Runner factory, session management, runReportAgent()
+│   │   ├── tools.ts               # FunctionTool wrappers (speech metrics, google search)
+│   │   └── index.ts               # Barrel exports with status notes
 │   ├── agents/
-│   │   ├── coaching-agent.ts
-│   │   ├── analytics-agent.ts
+│   │   ├── coaching-agent.ts      # @deprecated — replaced by adk/agents.ts
+│   │   ├── analytics-agent.ts     # Uses ADK LlmAgent + InMemoryRunner.runEphemeral()
 │   │   └── prompts/
 │   │       ├── pitch-perfect.md
 │   │       ├── empathy-trainer.md
@@ -525,77 +530,63 @@ After the session, provide:
 
 ## Phase 3: Backend — ADK Agent Setup
 
-### Step 3.1 — `server/agents/coaching-agent.ts`
+> **Implementation note:** ADK TypeScript SDK v0.4.0 does NOT implement `Runner.runLive()`.
+> Live audio streaming still uses raw `genai.live.connect()` via `gemini-bridge.ts`.
+> ADK is used for **non-streaming operations only**: report generation (`Runner.runAsync()`),
+> tone analysis, and analytics (`InMemoryRunner.runEphemeral()`).
 
-Define the Coaching Agent using ADK TypeScript SDK:
+### Step 3.1 — `server/adk/agents.ts`
+
+Define ADK `LlmAgent` definitions for all modes:
 
 ```typescript
-import { Agent } from '@google/adk';
+import { LlmAgent } from '@anthropic-ai/sdk'; // actually @google/adk
 import { config, loadPrompt, Mode } from '../config.js';
 
-export function createCoachingAgent(mode: Mode, tools: any[] = []) {
-  const systemPrompt = loadPrompt(mode);
-
-  return new Agent({
-    name: `coaching_agent_${mode}`,
-    model: config.geminiModel,
-    instruction: systemPrompt,
-    tools,
-  });
+export function createCoachingAgent(mode: Mode) {
+  // Scaffolded — waiting on ADK Runner.runLive() support
+  return new LlmAgent({ name: `coaching_agent_${mode}`, ... });
 }
+
+export function createReportAgent(mode: Mode) {
+  // Active — used by runner.ts via Runner.runAsync()
+  return new LlmAgent({ name: `report_agent_${mode}`, ... });
+}
+
+export function createTranscriptSummarizerAgent() { ... }
+export function createMetricsAnalyzerAgent() { ... }
 ```
 
-The Coaching Agent:
-- Receives the streaming audio from the user.
-- Uses the mode-specific system prompt to determine persona behavior.
-- Generates voice responses (interruptions, challenges, coaching cues).
-- Has access to Google Search tool (in Veritalk mode).
+### Step 3.2 — `server/adk/runner.ts`
 
-### Step 3.2 — `server/agents/analytics-agent.ts`
-
-Define the Analytics Agent:
+Runner factory and session management:
 
 ```typescript
-import { Agent } from '@google/adk';
+import { Runner, InMemoryRunner, InMemorySessionService } from '@google/adk';
 
-export function createAnalyticsAgent() {
-  return new Agent({
-    name: 'analytics_agent',
-    model: 'gemini-2.5-flash',
-    instruction: `
-      You are a speech analytics engine. You receive transcript chunks
-      and return structured metrics.
-
-      For each chunk, return JSON:
-      {
-        "filler_words": {"um": 2, "like": 3, "you know": 1},
-        "words_per_minute": 145,
-        "tone": "nervous",
-        "key_phrases": ["I think maybe", "sort of"],
-        "improvement_hint": "Reduce hedging phrases like 'I think maybe'"
-      }
-    `,
-  });
-}
+// runReportAgent() — uses Runner.runAsync() for structured report generation
+// InMemoryRunner.runEphemeral() — used by analytics-agent.ts and tone-analyzer.ts
 ```
 
-The Analytics Agent:
-- Receives periodic transcript chunks (every ~10 seconds).
-- Returns structured JSON metrics.
-- Does NOT produce audio output — metrics only.
-- Results are sent to the client as JSON events over the WebSocket.
+### Step 3.3 — `server/adk/tools.ts`
 
-### Step 3.3 — `server/tools/search-tool.ts`
-
-Google Search grounding for Veritalk mode:
+Tool definitions using ADK `FunctionTool` and built-in tools:
 
 ```typescript
-import { googleSearch } from '@google/adk/tools';
+import { FunctionTool } from '@google/adk';
+import { google_search } from '@google/adk/tools';
 
-export function getSearchTool() {
-  return googleSearch;
-}
+export const analyzeSpeechMetricsTool = new FunctionTool({ ... }); // Wraps extractMetrics()
+export const googleSearchTool = google_search;
 ```
+
+### Step 3.1-legacy — `server/agents/coaching-agent.ts` (deprecated)
+
+Original coaching agent file — marked `@deprecated`, replaced by `adk/agents.ts`.
+
+### Step 3.2-updated — `server/agents/analytics-agent.ts`
+
+Rewritten to use ADK `LlmAgent` + `InMemoryRunner.runEphemeral()` instead of raw `generateContent()`.
 
 ---
 

@@ -1,9 +1,7 @@
-import { GoogleGenAI } from '@google/genai';
 import { z } from 'zod';
-import { config, getReportConfig, type Mode, type ScenarioReportConfig } from './config.js';
+import { getReportConfig, type Mode, type ScenarioReportConfig } from './config.js';
 import type { MetricSnapshot, SessionReport } from './store.js';
-
-const genai = new GoogleGenAI({ apiKey: config.googleApiKey });
+import { runReportAgent } from './adk/runner.js';
 
 export interface TranscriptEntry {
   role: 'user' | 'ai';
@@ -240,16 +238,13 @@ export async function generateReport(
     const userEntriesCount = transcript.filter(t => t.role === 'user').length;
     console.log(`   [${sessionId}] Report prompt length: ${prompt.length} chars, user entries: ${userEntriesCount}, total turns: ${transcript.length}`);
 
-    const response = await genai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: [{
-        role: 'user',
-        parts: [{ text: prompt }],
-      }],
-    });
-
-    const text = response.text || '{}';
-    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const text = await runReportAgent('system', mode, prompt);
+    const cleaned = (text || '{}')
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim()
+      // Fix trailing commas before ] or } (common LLM JSON error)
+      .replace(/,\s*([\]}])/g, '$1');
     const parsed = JSON.parse(cleaned);
 
     const { base, extra } = validateReport(mode, parsed);

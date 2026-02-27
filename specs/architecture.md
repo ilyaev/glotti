@@ -86,24 +86,24 @@
 |---|---|---|
 | HTTP Server | Node.js + Express | Serves static files and health check endpoint |
 | WebSocket Server | `ws` library | Handles WebSocket connections from browser clients |
-| ADK Orchestrator | `@google/adk` (TypeScript) | Manages agent lifecycle, tool routing, and multi-agent coordination |
-| Coaching Agent | ADK Agent | Holds the persona's system prompt; processes audio via Gemini Live API; generates coaching interruptions |
-| Analytics Agent | ADK Agent | Runs in parallel; counts filler words, measures speaking pace, evaluates tone; emits real-time metric events |
-| Google Search Tool | ADK built-in | Provides real-time fact-checking for Veritalk mode |
+| ADK Integration | `@google/adk` (TypeScript) | ADK `LlmAgent` + `Runner.runAsync()` for report generation. ADK `InMemoryRunner.runEphemeral()` for tone analysis and analytics. **Note:** ADK `Runner.runLive()` is not yet implemented in the TS SDK — live audio streaming uses raw `genai.live.connect()` directly. |
+| Coaching Agent | ADK `LlmAgent` (defined) | Agent definition exists in `server/adk/agents.ts` but is **not used for live streaming** (runLive pending). Live coaching uses raw `genai.live.connect()` with the same system prompt. |
+| Analytics Agent | ADK `LlmAgent` + `InMemoryRunner` | Reimplemented as ADK agent in `server/agents/analytics-agent.ts`. Uses `runEphemeral()` for stateless transcript chunk analysis. |
+| Google Search Tool | ADK built-in `GOOGLE_SEARCH` | Provides real-time fact-checking for Veritalk mode (defined in `server/adk/tools.ts`) |
 | Gemini Live API Client | `@google/genai` | Opens bidirectional WebSocket to Gemini for audio/video streaming |
 | Session Store | `@google-cloud/firestore` | Persists session metadata, transcripts, and metrics for post-session reports |
 
 **Key design decisions:**
 - **Express + `ws` over Fastify.** Express is the most widely understood Node.js framework. The `ws` library provides raw WebSocket control needed for binary audio streaming.
 - **TypeScript throughout.** Type safety across agent definitions, message protocols, and config. Compiled with `tsx` for development, `tsc` for production.
-- **ADK multi-agent.** Coaching and Analytics are separate agents because they have orthogonal concerns. The Coaching Agent talks to the user; the Analytics Agent silently monitors and emits metrics. ADK orchestrates them in parallel.
+- **ADK multi-agent.** Coaching and Analytics are separate agents because they have orthogonal concerns. The Coaching Agent talks to the user; the Analytics Agent silently monitors and emits metrics. **Current limitation:** ADK `Runner.runLive()` is not yet implemented in the TypeScript SDK (v0.4.0), so live audio streaming remains on raw `genai.live.connect()`. ADK is currently used for: (1) report generation via `Runner.runAsync()`, (2) tone analysis via `InMemoryRunner.runEphemeral()`, (3) analytics agent via `InMemoryRunner.runEphemeral()`, and (4) session state tracking via `InMemorySessionService`.
 - **WebSocket proxy pattern.** The backend sits between the browser and Gemini Live API. The browser sends audio → backend pipes it to Gemini → Gemini responds → backend pipes audio back to client while simultaneously extracting metrics.
 
 ### 3. Gemini Live API Integration
 
 | Aspect | Detail |
 |---|---|
-| Model | `gemini-2.5-flash-native-audio` (or latest available native audio model) |
+| Model | `gemini-2.5-flash-native-audio-latest` (configurable via `GEMINI_MODEL` env var) |
 | Connection | Server-to-server WebSocket from Cloud Run to Gemini Live API |
 | SDK | `@google/genai` npm package |
 | Input | Streaming audio (PCM 16kHz) + optional video frames (JPEG/PNG) |
@@ -303,12 +303,17 @@ gemili/
 │   │   ├── protocol.ts          # Binary parsing + client message helpers
 │   │   └── feedback-context.ts  # Feedback mode context injection
 │   ├── agents/
-│   │   ├── coaching-agent.ts    # ADK Coaching Agent definition
-│   │   ├── analytics-agent.ts   # ADK Analytics Agent definition
+│   │   ├── coaching-agent.ts    # Legacy Coaching Agent definition (@deprecated)
+│   │   ├── analytics-agent.ts   # ADK Analytics Agent (LlmAgent + InMemoryRunner)
 │   │   └── prompts/
 │   │       ├── pitch-perfect.md
 │   │       ├── empathy-trainer.md
 │   │       └── veritalk.md
+│   ├── adk/                      # ADK integration layer
+│   │   ├── index.ts              # Barrel exports
+│   │   ├── agents.ts             # ADK LlmAgent definitions (coaching, report, summarizer, metrics)
+│   │   ├── runner.ts             # Runner factory, session management, runReportAgent()
+│   │   └── tools.ts              # FunctionTool wrappers (analyze_speech_metrics, GOOGLE_SEARCH)
 │   ├── tools/
 │   │   └── search-tool.ts       # Google Search grounding wrapper
 │   ├── store.ts                 # Session store interface (FileStore / Firestore)

@@ -7,10 +7,9 @@ import { config, loadPrompt, type Mode } from '../config.js';
  * via voice. It uses the mode-specific system prompt to determine behavior
  * (e.g., skeptical VC, upset customer, debate opponent).
  *
- * NOTE: In the current implementation, the coaching behavior is embedded
- * directly in the Gemini Live API session's system prompt (see ws-handler.ts).
- * This module provides the agent definition for future ADK orchestration
- * where multiple agents run in parallel.
+ * @deprecated Use `createCoachingAgent` from `server/adk/agents.ts` instead.
+ * This legacy module is kept for backward compatibility. The ADK version
+ * returns a proper LlmAgent instance with tools and callbacks.
  */
 export interface CoachingAgentConfig {
   name: string;
