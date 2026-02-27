@@ -78,6 +78,8 @@ graph LR
 | **Server-side OG image generation** | Social share previews use Satori + Resvg to render React components to PNG on the server, ensuring rich link previews on LinkedIn, X, Slack, and Discord. |
 | **Multi-stage Docker build** | Production image uses a two-stage Dockerfile — build stage compiles TypeScript, runtime stage copies only compiled output and production deps for a minimal container. |
 
+> **📐 Detailed architecture diagrams** — See [docs/diagrams.md](docs/diagrams.md) for 8 Mermaid diagrams covering the system at every level: high-level overview, WebSocket protocol, backend modules, audio pipeline, ADK agents, React components, deployment, and session lifecycle state machine.
+
 ### Tech Stack
 
 **Client:**
@@ -148,14 +150,36 @@ npm start            # Starts the production server
 
 ## Deployment
 
-Glotti is designed to run on **Google Cloud Run** as a single containerized service.
+Glotti is designed to run on **Google Cloud Run** as a single containerized service. Deployment is fully automated via infrastructure-as-code scripts included in the repository.
+
+### One-Command Deploy
+
+The [`deploy.sh`](deploy.sh) script handles the entire setup — enabling GCP APIs, creating Firestore, storing the API key in Secret Manager, and deploying to Cloud Run:
 
 ```bash
-# Deploy to Cloud Run
-npm run deploy
+./deploy.sh                          # Uses current gcloud project
+./deploy.sh --project my-project-id  # Specify a project
+./deploy.sh --region europe-west1    # Override region
+./deploy.sh --service my-service     # Override service name (default: debatepro-backend)
 ```
 
-See [specs/deployment.md](specs/deployment.md) for full deployment instructions including Firestore setup, Secret Manager configuration, and required GCP API enablement.
+### CI/CD Pipeline
+
+The [`cloudbuild.yaml`](cloudbuild.yaml) defines a Cloud Build pipeline that builds the Docker image, pushes it to Artifact Registry, and deploys to Cloud Run. It can be triggered automatically on push or run manually:
+
+```bash
+gcloud builds submit --config cloudbuild.yaml .
+```
+
+### Infrastructure-as-Code Files
+
+| File | Purpose |
+|---|---|
+| [`deploy.sh`](deploy.sh) | Full automated deployment script (APIs, Firestore, secrets, Cloud Run) |
+| [`cloudbuild.yaml`](cloudbuild.yaml) | Cloud Build CI/CD pipeline definition |
+| [`Dockerfile`](Dockerfile) | Multi-stage container build (TypeScript compile → minimal runtime image) |
+
+See [specs/deployment.md](specs/deployment.md) for detailed manual steps and alternative frontend hosting options.
 
 ---
 
