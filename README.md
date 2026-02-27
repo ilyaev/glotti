@@ -61,9 +61,9 @@ graph LR
     Backend <-->|"Gemini Live API<br/>audio / transcript"| Gemini["Gemini<br/>2.5 Flash"]
 
     Backend --- Persona["Persona Agent<br/>(persona-driven conversation)"]
-    Backend --- Analytics["Analytics Agent<br/>(real-time metrics)"]
-    Backend --- Tone["Tone Analyzer<br/>(background LLM analysis)"]
+    Backend --- ADK["Google ADK<br/>(report gen, analytics, tone)"]
     Backend --- Firestore["Firestore<br/>(session persistence & reports)"]
+    ADK --- Gemini2["Gemini 2.5 Flash<br/>(non-streaming)"]
 ```
 
 ### Key Technical Decisions
@@ -72,6 +72,7 @@ graph LR
 |---|---|
 | **WebSocket proxy pattern** | The backend sits between browser and Gemini Live API — pipes audio bidirectionally while simultaneously extracting metrics and managing session state. This enables server-side analytics without adding client latency. |
 | **Gemini Live API** | Bidirectional audio streaming with barge-in support. The agent can interrupt the user mid-sentence and the user can interrupt the agent — enabling natural, pressure-testing conversation flow. |
+| **Google ADK (limited)** | ADK `LlmAgent` + `Runner.runAsync()` for post-session report generation; `InMemoryRunner.runEphemeral()` for real-time tone analysis and analytics. Live audio streaming remains on raw `@google/genai` — ADK's `Runner.runLive()` is not yet implemented in the TypeScript SDK. |
 | **Google Cloud native** | Cloud Run for containerized hosting (scales to zero), Firestore for session persistence, Secret Manager for API keys. Single `npm run deploy` command. |
 | **Persona-as-prompt** | Each scenario is defined by a markdown system prompt in `server/agents/prompts/`. Adding a new mode requires only writing a prompt file and registering it in config — no code changes to the core engine. |
 | **Server-side OG image generation** | Social share previews use Satori + Resvg to render React components to PNG on the server, ensuring rich link previews on LinkedIn, X, Slack, and Discord. |
@@ -90,7 +91,8 @@ graph LR
 **Server:**
 - Node.js + Express 5 + TypeScript
 - `ws` library (raw WebSocket control for binary audio streaming)
-- `@google/genai` SDK (Gemini Live API integration)
+- `@google/genai` SDK (Gemini Live API — bidirectional audio streaming)
+- `@google/adk` SDK (report generation, tone analysis, analytics — non-streaming only)
 - Zod (runtime validation)
 - Satori + Resvg (server-side OG image rendering)
 
@@ -171,6 +173,10 @@ See [specs/deployment.md](specs/deployment.md) for full deployment instructions 
 │   │   ├── transcript-buffer.ts
 │   │   ├── tone-analyzer.ts # Background LLM tone analysis
 │   │   └── constants.ts     # Tunable thresholds
+│   ├── adk/                 # Google ADK integration (non-streaming)
+│   │   ├── agents.ts        # LlmAgent definitions (report agent)
+│   │   ├── runner.ts        # Runner factory + runReportAgent()
+│   │   └── index.ts         # Barrel exports
 │   ├── agents/prompts/      # Persona system prompts (markdown)
 │   ├── api/                 # REST endpoints
 │   └── services/            # OG image rendering
